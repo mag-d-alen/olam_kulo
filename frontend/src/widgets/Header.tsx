@@ -6,7 +6,7 @@ export const Header = () => {
 
   return (
     <header>
-      <div>
+      <div className='flex justify-end items-center gap-4 bg-gray-500 p-4'>
         {user ? (
           <>
             <Link to='/dashboard'>Go to Dashboard</Link>
