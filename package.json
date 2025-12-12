@@ -1,0 +1,15 @@
+{
+  "name": "olamkulo",
+  "version": "1.0.0",
+  "description": "OlamKulo full-stack application",
+  "private": true,
+  "scripts": {
+    "supabase:link": "npx supabase link --project-ref",
+    "supabase:push": "npx supabase db push",
+    "supabase:migration": "npx supabase migration"
+  },
+  "devDependencies": {
+    "supabase": "^1.0.0"
+  }
+}
+
