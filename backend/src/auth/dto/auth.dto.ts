@@ -1,4 +1,10 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsObject } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 
 export class SignUpDto {
   @IsEmail()
@@ -7,10 +13,6 @@ export class SignUpDto {
   @IsString()
   @MinLength(6)
   password: string;
-
-  @IsOptional()
-  @IsObject()
-  metadata?: Record<string, any>;
 }
 
 export class SignInDto {
@@ -20,4 +22,3 @@ export class SignInDto {
   @IsString()
   password: string;
 }
-

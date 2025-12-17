@@ -8,21 +8,16 @@ export class AuthService {
 
   async signUp(signUpDto: SignUpDto) {
     const supabase = this.supabaseService.getClient();
-    const { email, password, metadata } = signUpDto;
+    const { email, password } = signUpDto;
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: metadata || {},
-        emailRedirectTo: `${process.env.FRONTEND_URL}/auth/callback`,
-      },
     });
 
     if (error) {
       throw new UnauthorizedException(error.message);
     }
-
     return {
       user: data.user,
       session: data.session,

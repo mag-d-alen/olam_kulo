@@ -1,11 +1,12 @@
 import { Layout } from '../components/Layout';
-import { useSignOut } from '../features/authorisation/hooks/useAuth';
+import { useUser } from '../features/authorisation/hooks/useAuth';
 
 export const DashboardPage = () => {
-  const { signOut } = useSignOut();
+  const { user } = useUser();
   return (
     <Layout>
-      <p>Welcome to the dashboard</p>
+      <h1>Dashboard</h1>
+      {JSON.stringify(user)}
     </Layout>
   );
 };

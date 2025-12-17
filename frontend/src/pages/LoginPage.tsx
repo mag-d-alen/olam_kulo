@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
 import { useSignIn } from '../features/authorisation/hooks/useAuth';
 import { useForm } from 'react-hook-form';
-
+import { Link } from '@tanstack/react-router';
 export const LoginPage = () => {
   const {
     register,
@@ -29,15 +28,8 @@ export const LoginPage = () => {
             {...register('password')}
           />
         </div>
-        {signInError && (
-          <div style={{ color: 'red', marginBottom: '1rem' }}>
-            {signInError.message}
-          </div>
-        )}
-        <button
-          type='submit'
-          disabled={signInPending || isSubmitting}
-          style={{ width: '100%' }}>
+        {signInError && <div>{signInError.message}</div>}
+        <button type='submit' disabled={signInPending || isSubmitting}>
           {signInPending ? 'Signing in...' : 'Sign In'}
         </button>
       </form>

@@ -10,13 +10,15 @@ export class SupabaseService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {
     this.supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    this.supabaseKey = this.configService.get<string>('SUPABASE_ANON_KEY');
+    this.supabaseKey = this.configService.get<string>(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    );
   }
 
   onModuleInit() {
     if (!this.supabaseUrl || !this.supabaseKey) {
       throw new Error(
-        'Missing Supabase credentials. Please check the SUPABASE_URL and SUPABASE_ANON_KEY in your .env file',
+        'Missing Supabase credentials. Please check SUPABASE_URL and SUPABASE_ANON_KEY in your .env file',
       );
     }
 
@@ -32,4 +34,3 @@ export class SupabaseService implements OnModuleInit {
     return this.supabaseClient;
   }
 }
-

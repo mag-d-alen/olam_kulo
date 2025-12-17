@@ -31,19 +31,6 @@ export class AuthController {
     return this.authService.signOut(req.accessToken);
   }
 
-  @Get('oauth')
-  async getOAuthUrl(
-    @Query('provider') provider: string,
-    @Query('redirectTo') redirectTo?: string,
-  ) {
-    return this.authService.getOAuthUrl(provider, redirectTo);
-  }
-
-  @Get('callback')
-  async handleOAuthCallback(@Query('code') code: string) {
-    return this.authService.handleOAuthCallback(code);
-  }
-
   @Post('refresh')
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return this.authService.refreshToken(refreshToken);

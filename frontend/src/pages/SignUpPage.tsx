@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
 import { useSignUp } from '../features/authorisation/hooks/useAuth';
 import { useForm } from 'react-hook-form';
+import { Link } from '@tanstack/react-router';
 
 export const SignUpPage = () => {
   const { signUp, error: signUpError, isPending: signUpPending } = useSignUp();

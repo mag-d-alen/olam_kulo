@@ -1,18 +1,13 @@
-import React, { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { QueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { authKeys } from '../features/authorisation/hooks/useAuth';
 
 /**
- * Minimal provider that listens to Supabase auth state changes
- * and syncs them with React Query cache.
- * This is the only provider needed - React Query handles the rest!
+ * Hook to sync Supabase auth state changes with React Query cache
+ * Call this once at the root level of your app
  */
-export const AuthStateListener: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const queryClient = useQueryClient();
-
+export function useAuthSync(queryClient: QueryClient) {
   useEffect(() => {
     const {
       data: { subscription },
@@ -24,7 +19,5 @@ export const AuthStateListener: React.FC<{ children: React.ReactNode }> = ({
 
     return () => subscription.unsubscribe();
   }, [queryClient]);
-
-  return <>{children}</>;
-};
+}
 

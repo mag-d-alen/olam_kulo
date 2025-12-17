@@ -5,7 +5,7 @@ import {
   SignInData,
   SignUpData,
 } from '../../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -26,10 +26,35 @@ export const useSession = () => {
 };
 
 export const useUser = () => {
-  const { data: session, ...rest } = useSession();
+  const { data: session, isLoading: sessionLoading, ...rest } = useSession();
+
+  // Fetch public user data
+  const { data: userData, isLoading: publicUserLoading } = useQuery({
+    queryKey: [...authKeys.user(), 'profile', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return null;
+
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching public user:', error);
+        return null;
+      }
+
+      return userData;
+    },
+    enabled: !!session?.user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return {
     ...rest,
-    user: session?.user ?? null,
+    user: userData,
+    isLoading: sessionLoading || publicUserLoading,
   };
 };
 
@@ -50,7 +75,7 @@ export const useSignUp = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all });
-      navigate('/dashboard');
+      navigate({ to: '/app/dashboard' });
     },
   });
   return {
@@ -77,7 +102,7 @@ export const useSignIn = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all });
-      navigate('/dashboard');
+      navigate({ to: '/app/dashboard' });
     },
   });
   return {
@@ -89,6 +114,7 @@ export const useSignIn = () => {
 
 export const useSignOut = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const {
     mutate: signOut,
@@ -99,41 +125,16 @@ export const useSignOut = () => {
       await authService.signOut();
     },
     onSuccess: () => {
+      console.log('signOut success');
+      console.log(authKeys.all);
       queryClient.setQueryData(authKeys.session(), null);
       queryClient.setQueryData(authKeys.user(), null);
       queryClient.invalidateQueries({ queryKey: authKeys.all });
+      navigate({ to: '/login' });
     },
   });
   return {
     signOut,
-    isPending,
-    error,
-  };
-};
-
-export const useOAuthCallback = () => {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  const {
-    mutate: oauthCallback,
-    isPending,
-    error,
-  } = useMutation({
-    mutationFn: async (code: string) => {
-      const response = await authService.handleOAuthCallback(code);
-      if (response.session) {
-        await supabase.auth.setSession(response.session);
-      }
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      navigate('/dashboard');
-    },
-  });
-  return {
-    oauthCallback,
     isPending,
     error,
   };
