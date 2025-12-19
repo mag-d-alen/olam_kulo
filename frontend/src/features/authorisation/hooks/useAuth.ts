@@ -1,11 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../services/supabase';
-import {
-  authService,
-  SignInData,
-  SignUpData,
-} from '../../../services/authService';
+import { authService, SignUpData } from '../../../services/authService';
 import { useNavigate } from '@tanstack/react-router';
+import { User } from '../types';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -27,13 +24,10 @@ export const useSession = () => {
 
 export const useUser = () => {
   const { data: session, isLoading: sessionLoading, ...rest } = useSession();
-
-  // Fetch public user data
   const { data: userData, isLoading: publicUserLoading } = useQuery({
-    queryKey: [...authKeys.user(), 'profile', session?.user?.id],
+    queryKey: [...authKeys.user()],
     queryFn: async () => {
       if (!session?.user?.id) return null;
-
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
@@ -44,7 +38,6 @@ export const useUser = () => {
         console.error('Error fetching public user:', error);
         return null;
       }
-
       return userData;
     },
     enabled: !!session?.user?.id,
@@ -53,7 +46,14 @@ export const useUser = () => {
 
   return {
     ...rest,
-    user: userData,
+    user: userData
+      ? ({
+          id: userData.id,
+          email: userData.email,
+          homeCity: userData.home_city,
+          homeCountry: userData.home_country,
+        } as User)
+      : null,
     isLoading: sessionLoading || publicUserLoading,
   };
 };
@@ -70,12 +70,13 @@ export const useSignUp = () => {
       const response = await authService.signUp(data);
       if (response.session) {
         await supabase.auth.setSession(response.session);
+        queryClient.setQueryData(authKeys.user(), response.user);
+        queryClient.invalidateQueries({ queryKey: authKeys.user() });
       }
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      navigate({ to: '/app/dashboard' });
+      navigate({ to: '/dashboard' });
     },
   });
   return {
@@ -86,23 +87,28 @@ export const useSignUp = () => {
 };
 
 export const useSignIn = () => {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
     mutate: signIn,
     isPending,
     error,
   } = useMutation({
-    mutationFn: async (data: SignInData) => {
-      const response = await authService.signIn(data);
-      if (response.session) {
-        await supabase.auth.setSession(response.session);
-      }
-      return response;
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      navigate({ to: '/app/dashboard' });
+      navigate({ to: '/dashboard' });
     },
   });
   return {
@@ -126,35 +132,20 @@ export const useSignOut = () => {
     },
     onSuccess: () => {
       console.log('signOut success');
-      console.log(authKeys.all);
+      console.log(authKeys.user());
+      console.log(authKeys.session());
       queryClient.setQueryData(authKeys.session(), null);
       queryClient.setQueryData(authKeys.user(), null);
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
+      // queryClient.invalidateQueries({
+      //   queryKey: [...authKeys.user()],
+      // });
+
       navigate({ to: '/login' });
     },
   });
   return {
     signOut,
     isPending,
-    error,
-  };
-};
-
-export const useCurrentUser = () => {
-  const { data: session, isLoading, error } = useSession();
-
-  const { data: user } = useQuery({
-    queryKey: [...authKeys.user(), 'profile'],
-    queryFn: async () => {
-      if (!session?.access_token) return null;
-      return await authService.getCurrentUser(session.access_token);
-    },
-    enabled: !!session?.access_token,
-    staleTime: 5 * 60 * 1000,
-  });
-  return {
-    user,
-    isLoading,
     error,
   };
 };

@@ -1,10 +1,22 @@
 import { Header } from '../widgets/Header';
 
-export const Layout = ({ children }: { children: React.ReactNode }) => {
+type LayoutProps = {
+  children: React.ReactNode;
+  isLoading?: boolean;
+};
+export const Layout = ({ children, isLoading = false }: LayoutProps) => {
   return (
     <>
       <Header />
-      {children}
+      {isLoading ? <div>Loading...</div> : children}
+      <Footer />
     </>
+  );
+};
+const Footer = () => {
+  return (
+    <footer className='flex justify-center items-center bg-gray-500 p-4 w-full'>
+      <p>Footer</p>
+    </footer>
   );
 };

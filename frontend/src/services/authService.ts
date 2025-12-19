@@ -105,17 +105,4 @@ export const authService = {
     }
   },
 
-  async getCurrentUser(accessToken: string): Promise<UserProfile> {
-    try {
-      const response = await axios.get(`${API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      throw error;
-    }
-  },
 };

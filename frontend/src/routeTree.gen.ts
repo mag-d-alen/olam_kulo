@@ -9,175 +9,144 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as LogoutRouteImport } from './routes/logout'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AppIndexRouteImport } from './routes/app/index'
-import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
-import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicSignupRouteImport } from './routes/_public/signup'
+import { Route as PublicLoginRouteImport } from './routes/_public/login'
+import { Route as AuthOnboardingRouteImport } from './routes/_auth/onboarding'
+import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
+import { Route as Auth_layoutRouteImport } from './routes/_auth/__layout'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/_public/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicSignupRoute = PublicSignupRouteImport.update({
+  id: '/_public/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LogoutRoute = LogoutRouteImport.update({
-  id: '/logout',
-  path: '/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
+const PublicLoginRoute = PublicLoginRouteImport.update({
+  id: '/_public/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const AuthOnboardingRoute = AuthOnboardingRouteImport.update({
+  id: '/_auth/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/app/',
-  path: '/app/',
+const AuthDashboardRoute = AuthDashboardRouteImport.update({
+  id: '/_auth/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppOnboardingRoute = AppOnboardingRouteImport.update({
-  id: '/app/onboarding',
-  path: '/app/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/app/dashboard',
-  path: '/app/dashboard',
+const Auth_layoutRoute = Auth_layoutRouteImport.update({
+  id: '/_auth/__layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRoute
-  '/logout': typeof LogoutRoute
-  '/signup': typeof SignupRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app': typeof AppIndexRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/onboarding': typeof AuthOnboardingRoute
+  '/login': typeof PublicLoginRoute
+  '/signup': typeof PublicSignupRoute
+  '/': typeof PublicIndexRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
-  '/logout': typeof LogoutRoute
-  '/signup': typeof SignupRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app': typeof AppIndexRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/onboarding': typeof AuthOnboardingRoute
+  '/login': typeof PublicLoginRoute
+  '/signup': typeof PublicSignupRoute
+  '/': typeof PublicIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_authenticated': typeof AuthenticatedRoute
-  '/login': typeof LoginRoute
-  '/logout': typeof LogoutRoute
-  '/signup': typeof SignupRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app/': typeof AppIndexRoute
+  '/_auth/__layout': typeof Auth_layoutRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/onboarding': typeof AuthOnboardingRoute
+  '/_public/login': typeof PublicLoginRoute
+  '/_public/signup': typeof PublicSignupRoute
+  '/_public/': typeof PublicIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/login'
-    | '/logout'
-    | '/signup'
-    | '/app/dashboard'
-    | '/app/onboarding'
-    | '/app'
+  fullPaths: '/dashboard' | '/onboarding' | '/login' | '/signup' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/login'
-    | '/logout'
-    | '/signup'
-    | '/app/dashboard'
-    | '/app/onboarding'
-    | '/app'
+  to: '/dashboard' | '/onboarding' | '/login' | '/signup' | '/'
   id:
     | '__root__'
-    | '/_authenticated'
-    | '/login'
-    | '/logout'
-    | '/signup'
-    | '/app/dashboard'
-    | '/app/onboarding'
-    | '/app/'
+    | '/_auth/__layout'
+    | '/_auth/dashboard'
+    | '/_auth/onboarding'
+    | '/_public/login'
+    | '/_public/signup'
+    | '/_public/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthenticatedRoute: typeof AuthenticatedRoute
-  LoginRoute: typeof LoginRoute
-  LogoutRoute: typeof LogoutRoute
-  SignupRoute: typeof SignupRoute
-  AppDashboardRoute: typeof AppDashboardRoute
-  AppOnboardingRoute: typeof AppOnboardingRoute
-  AppIndexRoute: typeof AppIndexRoute
+  Auth_layoutRoute: typeof Auth_layoutRoute
+  AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthOnboardingRoute: typeof AuthOnboardingRoute
+  PublicLoginRoute: typeof PublicLoginRoute
+  PublicSignupRoute: typeof PublicSignupRoute
+  PublicIndexRoute: typeof PublicIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/signup': {
+      id: '/_public/signup'
       path: '/signup'
       fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
+      preLoaderRoute: typeof PublicSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/logout': {
-      id: '/logout'
-      path: '/logout'
-      fullPath: '/logout'
-      preLoaderRoute: typeof LogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
+    '/_public/login': {
+      id: '/_public/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+      preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_auth/onboarding': {
+      id: '/_auth/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/__layout': {
+      id: '/_auth/__layout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/': {
-      id: '/app/'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/onboarding': {
-      id: '/app/onboarding'
-      path: '/app/onboarding'
-      fullPath: '/app/onboarding'
-      preLoaderRoute: typeof AppOnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/dashboard': {
-      id: '/app/dashboard'
-      path: '/app/dashboard'
-      fullPath: '/app/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
+      preLoaderRoute: typeof Auth_layoutRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  AuthenticatedRoute: AuthenticatedRoute,
-  LoginRoute: LoginRoute,
-  LogoutRoute: LogoutRoute,
-  SignupRoute: SignupRoute,
-  AppDashboardRoute: AppDashboardRoute,
-  AppOnboardingRoute: AppOnboardingRoute,
-  AppIndexRoute: AppIndexRoute,
+  Auth_layoutRoute: Auth_layoutRoute,
+  AuthDashboardRoute: AuthDashboardRoute,
+  AuthOnboardingRoute: AuthOnboardingRoute,
+  PublicLoginRoute: PublicLoginRoute,
+  PublicSignupRoute: PublicSignupRoute,
+  PublicIndexRoute: PublicIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
