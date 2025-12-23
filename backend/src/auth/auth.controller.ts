@@ -5,40 +5,40 @@ import {
   Get,
   Query,
   UseGuards,
-  Request,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
 import { SupabaseAuthGuard } from './guards/supabase-auth.guard';
+import { SetAuthTokenInterceptor } from './interceptors/set-auth-token.interceptor';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { User } from '@supabase/supabase-js';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
+  @Post('signUp')
   async signUp(@Body() signUpDto: SignUpDto) {
     return this.authService.signUp(signUpDto);
   }
 
-  @Post('signin')
+  @Post('signIn')
   async signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
   }
 
-  @Post('signout')
+  @Post('signOut')
   @UseGuards(SupabaseAuthGuard)
-  async signOut(@Request() req) {
-    return this.authService.signOut(req.accessToken);
+  @UseInterceptors(SetAuthTokenInterceptor)
+  async signOut() {
+    return this.authService.signOut();
   }
 
-  @Post('refresh')
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    return this.authService.refreshToken(refreshToken);
-  }
-
-  @Get('me')
+  @Get('getUser')
   @UseGuards(SupabaseAuthGuard)
-  async getCurrentUser(@Request() req) {
-    return this.authService.getUser(req.accessToken);
+  @UseInterceptors(SetAuthTokenInterceptor)
+  async getUser(@CurrentUser('id') userId: string) {
+    return this.authService.getUser(userId);
   }
 }

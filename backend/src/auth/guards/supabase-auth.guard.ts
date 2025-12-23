@@ -18,7 +18,7 @@ export class SupabaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
 
-    const token = authHeader.substring(7); 
+    const token = authHeader.substring(7);
 
     try {
       const supabase = this.supabaseService.getClient();
@@ -43,4 +43,3 @@ export class SupabaseAuthGuard implements CanActivate {
     }
   }
 }
-

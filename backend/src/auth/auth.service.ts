@@ -1,10 +1,26 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
+import { Session, User, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class AuthService {
   constructor(private supabaseService: SupabaseService) {}
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
+  private user: User | null = null;
+  private session: Session | null = null;
+
+  setAccessToken(accessToken: string): void {
+    this.accessToken = accessToken;
+  }
+
+  getAuthClient(): SupabaseClient {
+    if (!this.accessToken) {
+      throw new UnauthorizedException('No access token provided');
+    }
+    return this.supabaseService.getClientForUser(this.accessToken);
+  }
 
   async signUp(signUpDto: SignUpDto) {
     const supabase = this.supabaseService.getClient();
@@ -18,11 +34,15 @@ export class AuthService {
     if (error) {
       throw new UnauthorizedException(error.message);
     }
+    this.accessToken = data.session?.access_token ?? null;
+    this.refreshToken = data.session?.refresh_token ?? null;
+    this.user = data.user;
+    this.session = data.session;
     return {
-      user: data.user,
-      session: data.session,
-      accessToken: data.session?.access_token,
-      refreshToken: data.session?.refresh_token,
+      access_token: this.accessToken,
+      refresh_token: this.refreshToken,
+      user: { id: this.user?.id, email: this.user?.email },
+      session: this.session ?? null,
     };
   }
 
@@ -39,16 +59,20 @@ export class AuthService {
       throw new UnauthorizedException(error.message);
     }
 
+    this.accessToken = data.session?.access_token;
+    this.refreshToken = data.session?.refresh_token;
+    this.user = data.user;
+    this.session = data.session;
     return {
-      user: data.user,
-      session: data.session,
-      accessToken: data.session?.access_token,
-      refreshToken: data.session?.refresh_token,
+      access_token: this.accessToken,
+      refresh_token: this.refreshToken,
+      user: { id: this.user.id, email: this.user.email },
+      session: this.session,
     };
   }
 
-  async signOut(accessToken: string) {
-    const supabase = this.supabaseService.getClient();
+  async signOut() {
+    const supabase = this.getAuthClient();
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -58,49 +82,45 @@ export class AuthService {
     return { message: 'Successfully signed out' };
   }
 
-  async handleOAuthCallback(code: string) {
-    const supabase = this.supabaseService.getClient();
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  // async exchangeRefreshToken() {
+  //   const supabase = this.supabaseService.getClient();
+  //   const { data, error } = await supabase.auth.refreshSession({
+  //     refresh_token: this.refreshToken ?? '',
+  //   });
+  //   this.accessToken = data.session?.access_token ?? null;
+  //   this.refreshToken = data.session?.refresh_token ?? null;
+  //   this.user = data.user;
+  //   this.session = data.session;
+  // }
 
-    if (error) {
-      throw new UnauthorizedException(error.message);
+  async getUser(userId: string) {
+    try {
+      const supabase = this.getAuthClient();
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id, email, home_city, home_country')
+        .eq('id', userId)
+        .single();
+
+      if (userError) {
+        throw new UnauthorizedException(
+          `Error getting user data: ${userError.message}`,
+        );
+      }
+      if (!userData) {
+        throw new UnauthorizedException('User not found');
+      }
+      return {
+        id: userData.id,
+        email: userData.email,
+        homeCity: userData.home_city ?? null,
+        homeCountry: userData.home_country ?? null,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException((error as Error).message);
     }
-
-    return {
-      user: data.user,
-      session: data.session,
-      accessToken: data.session?.access_token,
-      refreshToken: data.session?.refresh_token,
-    };
-  }
-
-  async refreshToken(refreshToken: string) {
-    const supabase = this.supabaseService.getClient();
-    const { data, error } = await supabase.auth.refreshSession({
-      refresh_token: refreshToken,
-    });
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return {
-      accessToken: data.session?.access_token,
-      refreshToken: data.session?.refresh_token,
-    };
-  }
-
-  async getUser(accessToken: string) {
-    const supabase = this.supabaseService.getClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(accessToken);
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return user;
   }
 }
