@@ -5,26 +5,25 @@ import {
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen';
-import type { User } from './features/authorisation/types';
-import type { Session } from '@supabase/supabase-js';
+import type { AppRouterContext } from './router.types';
 import {
   AuthProvider,
   useAuthContext,
-} from './features/authorisation/contexts/AuthContext';
+} from './authentication/contexts/AuthContext';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Loader } from './components/Loader';
+
+const queryClient = new QueryClient();
 
 const router = createRouter({
   routeTree,
-  defaultPendingComponent: () => (
-    <div className={`p-2 text-2xl`}>
-      <span>Loading...</span>
-    </div>
-  ),
+  defaultPendingComponent: () => <Loader />,
   defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
   context: {
-    user: null as User | null,
-    session: null as Session | null,
-    queryClient: new QueryClient(),
-  },
+    user: null,
+    session: null,
+    queryClient,
+  } as AppRouterContext,
   defaultPreload: 'intent',
   scrollRestoration: true,
 });
@@ -37,23 +36,28 @@ declare module '@tanstack/react-router' {
 
 function RouterWithAuth() {
   const { user, session } = useAuthContext();
-  const queryClient = new QueryClient();
+  const routerContext = {
+    user: user || null,
+    session: session || null,
+    queryClient,
+  };
 
   return (
     <RouterProvider
       router={router}
-      context={{ user, session, queryClient }}
-      defaultPreload='intent'
+      context={routerContext}
+      defaultPreload="intent"
     />
   );
 }
 
 export function App() {
   return (
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RouterWithAuth />
       </AuthProvider>
+      <ReactQueryDevtools />
     </QueryClientProvider>
   );
 }

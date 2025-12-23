@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../../services/supabase';
-import { authService, SignUpData } from '../../../services/authService';
+import { sessionManager } from '../../services/session';
+import { authApi, SignUpData } from '../api/authApi';
 import { useNavigate } from '@tanstack/react-router';
-import { User } from '../types';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -14,11 +13,11 @@ export const useSession = () => {
   return useQuery({
     queryKey: authKeys.session(),
     queryFn: async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      return data.session;
+      const session = sessionManager.getSession();
+      return session ?? null;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData: () => null,
+    placeholderData: null,
   });
 };
 
@@ -27,33 +26,16 @@ export const useUser = () => {
   const { data: userData, isLoading: publicUserLoading } = useQuery({
     queryKey: [...authKeys.user()],
     queryFn: async () => {
-      if (!session?.user?.id) return null;
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching public user:', error);
-        return null;
-      }
-      return userData;
+      if (!session?.access_token) return null;
+      const user = await authApi.getUser();
+      return user;
     },
-    enabled: !!session?.user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!session?.access_token,
   });
-
+  console.log('userData', userData);
   return {
     ...rest,
-    user: userData
-      ? ({
-          id: userData.id,
-          email: userData.email,
-          homeCity: userData.home_city,
-          homeCountry: userData.home_country,
-        } as User)
-      : null,
+    user: userData ?? null,
     isLoading: sessionLoading || publicUserLoading,
   };
 };
@@ -67,16 +49,18 @@ export const useSignUp = () => {
     error,
   } = useMutation({
     mutationFn: async (data: SignUpData) => {
-      const response = await authService.signUp(data);
-      if (response.session) {
-        await supabase.auth.setSession(response.session);
-        queryClient.setQueryData(authKeys.user(), response.user);
-        queryClient.invalidateQueries({ queryKey: authKeys.user() });
-      }
+      const response = await authApi.signUp(data);
       return response;
     },
-    onSuccess: () => {
-      navigate({ to: '/dashboard' });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: authKeys.user() });
+      await queryClient.refetchQueries({ queryKey: authKeys.session() });
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          navigate({ to: '/signup', replace: true });
+        });
+      });
     },
   });
   return {
@@ -87,6 +71,7 @@ export const useSignUp = () => {
 };
 
 export const useSignIn = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
     mutate: signIn,
@@ -100,15 +85,24 @@ export const useSignIn = () => {
       email: string;
       password: string;
     }) => {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const response = await authApi.signIn({
         email,
         password,
       });
-      if (error) throw error;
-      return data;
+      if (!response.user.id) {
+        throw new Error('Invalid response data');
+      }
+      const userData = await authApi.getUser();
+      return { user: userData, session: response.session };
     },
-    onSuccess: () => {
-      navigate({ to: '/dashboard' });
+    onSuccess: (data) => {
+      queryClient.setQueryData(authKeys.user(), data.user);
+      queryClient.setQueryData(authKeys.session(), data.session);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          navigate({ to: '/login', replace: true });
+        });
+      });
     },
   });
   return {
@@ -128,18 +122,11 @@ export const useSignOut = () => {
     error,
   } = useMutation({
     mutationFn: async () => {
-      await authService.signOut();
+      await authApi.signOut();
     },
     onSuccess: () => {
-      console.log('signOut success');
-      console.log(authKeys.user());
-      console.log(authKeys.session());
       queryClient.setQueryData(authKeys.session(), null);
       queryClient.setQueryData(authKeys.user(), null);
-      // queryClient.invalidateQueries({
-      //   queryKey: [...authKeys.user()],
-      // });
-
       navigate({ to: '/login' });
     },
   });

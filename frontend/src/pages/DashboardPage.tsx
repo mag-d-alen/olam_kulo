@@ -1,10 +1,15 @@
-import { useRouteContext } from '@tanstack/react-router';
+import { DestinationWheel } from '../widgets/DestinationWheel';
+import { useAuthContext } from '../authentication/contexts/AuthContext';
 
-import { OnboardingPage } from './OnboardingPage';
 export const DashboardPage = () => {
-  const { user } = useRouteContext({ from: '__root__' });
-  if(!user) {
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <div>No user found</div>;
   }
 
   return (
@@ -12,17 +17,15 @@ export const DashboardPage = () => {
       <div>
         <h1>Welcome to Olam Kulo</h1>
       </div>
-      {!user && <div>Loading...</div>}
-      {user && <div>{user.email}</div>}
-      {user?.homeCity ? (
-        <div>
-          <h2>Welcome to {user.homeCity}</h2>
-        </div>
-      ) : (
-        <div>
-          <OnboardingPage />
-        </div>
-      )}
+      <div>{user.email}</div>
+      <div>
+        <h2>You are now in {user.homeCity}</h2>
+        <p>
+          To start your journey, turn the wheel and see what is your next
+          destination!
+        </p>
+        <DestinationWheel />
+      </div>
     </>
   );
 };

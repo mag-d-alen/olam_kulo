@@ -1,9 +1,7 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../../services/supabase';
-import { useSession, useUser, authKeys } from '../hooks/useAuth';
+import React, { createContext, useContext } from 'react';
+import { useSession, useUser } from '../hooks/useAuth';
 import { User } from '../types';
-import { Session } from '@supabase/supabase-js';
+import { Session } from '../../services/session';
 
 interface AuthContextType {
   user: User | null;
@@ -26,19 +24,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const queryClient = useQueryClient();
   const { data: session, isLoading: sessionLoading } = useSession();
   const { user, isLoading: userLoading } = useUser();
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-    });
-
-    return () => subscription.unsubscribe();
-  }, [queryClient]);
 
   const isLoading = sessionLoading || userLoading;
 
@@ -48,7 +35,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user: user || null,
         session: session || null,
         isLoading,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

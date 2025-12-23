@@ -1,4 +1,4 @@
-import { useSignUp } from '../features/authorisation/hooks/useAuth';
+import { useSignUp } from '../authentication/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { Link } from '@tanstack/react-router';
 
@@ -19,27 +19,27 @@ export const SignUpPage = () => {
         <div>
           <input
             {...register('email')}
-            type='email'
-            placeholder='Email'
+            type="email"
+            placeholder="Email"
             required
           />
         </div>
         <div>
           <input
             {...register('password')}
-            type='password'
-            placeholder='Password'
+            type="password"
+            placeholder="Password"
             required
           />
         </div>
         {signUpError && <div>{errorMessage}</div>}
-        <button type='submit' disabled={signUpPending || isSubmitting}>
+        <button type="submit" disabled={signUpPending || isSubmitting}>
           {signUpPending ? 'Signing up...' : 'Sign Up'}
         </button>
       </form>
 
       <p>
-        Already have an account? <Link to='/login'>Login</Link>
+        Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
   );

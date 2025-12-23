@@ -1,4 +1,4 @@
-import { useSignIn } from '../features/authorisation/hooks/useAuth';
+import { useSignIn } from '../authentication/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { Link } from '@tanstack/react-router';
 export const LoginPage = () => {
@@ -16,25 +16,25 @@ export const LoginPage = () => {
         <div>
           <input
             {...register('email')}
-            type='email'
-            placeholder='Email'
+            type="email"
+            placeholder="Email"
             required
           />
         </div>
         <div>
           <input
-            type='password'
-            placeholder='Password'
+            type="password"
+            placeholder="Password"
             {...register('password')}
           />
         </div>
         {signInError && <div>{signInError.message}</div>}
-        <button type='submit' disabled={signInPending || isSubmitting}>
+        <button type="submit" disabled={signInPending || isSubmitting}>
           {signInPending ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
       <p>
-        Don't have an account? <Link to='/signup'>Sign up</Link>
+        Don't have an account? <Link to="/signup">Sign up</Link>
       </p>
     </div>
   );
