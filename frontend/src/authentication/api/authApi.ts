@@ -30,23 +30,19 @@ export interface SignInResponse {
 
 export const authApi = {
   async signUp(data: SignUpData): Promise<SignUpResponse> {
-    try {
-      const response = await apiClient.post('/auth/signUp', data);
-      const responseData = response.data as {
-        session: Session;
-        user: { id: string; email: string };
-      };
+    const response = await apiClient.post('/auth/signUp', data);
+    console.log('response', response);
+    const responseData = response.data as {
+      session: Session;
+      user: { id: string; email: string };
+    };
 
-      if (responseData.session) {
-        sessionManager.setSession(responseData.session);
-      }
+    if (responseData.session) {
       sessionManager.setSession(responseData.session);
-
-      return { session: responseData.session, user: responseData.user };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
     }
+    sessionManager.setSession(responseData.session);
+
+    return { session: responseData.session, user: responseData.user };
   },
 
   async getUser(): Promise<User> {

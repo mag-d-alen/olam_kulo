@@ -13,6 +13,8 @@ type AddHomeCityResponse = {
 export const addHomeCity = async (
   homeCity: string
 ): Promise<AddHomeCityResponse> => {
-  const response = await apiClient.post('/home-city/add', { homeCity });
+  const response = await apiClient.post('/onboarding/addHomeCity', {
+    homeCity,
+  });
   return response.data;
 };

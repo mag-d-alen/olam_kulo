@@ -25,23 +25,28 @@ export class AuthService {
   async signUp(signUpDto: SignUpDto) {
     const supabase = this.supabaseService.getClient();
     const { email, password } = signUpDto;
-
+    console.log('email', email);
+    console.log('password', password);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
+    console.log('data', data);
+    console.log('error', error);
 
     if (error) {
       throw new UnauthorizedException(error.message);
     }
-    const userData = await this.getUserByEmail(email);
-    if (userData) {
-      throw new UnauthorizedException('User already exists');
-    }
+
     this.accessToken = data.session?.access_token ?? null;
     this.refreshToken = data.session?.refresh_token ?? null;
     this.user = data.user;
     this.session = data.session;
+
+    console.log('this.user', this.user);
+    console.log('this.session', this.session);
+    console.log('this.accessToken', this.accessToken);
+    console.log('this.refreshToken', this.refreshToken);
     return {
       access_token: this.accessToken,
       refresh_token: this.refreshToken,

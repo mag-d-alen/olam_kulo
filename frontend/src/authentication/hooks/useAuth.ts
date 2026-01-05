@@ -36,6 +36,7 @@ export const useUser = () => {
 
 export const useSignUp = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     mutate: signUp,
     isPending,
@@ -43,10 +44,12 @@ export const useSignUp = () => {
   } = useMutation({
     mutationFn: async (data: SignUpData) => {
       const response = await authApi.signUp(data);
-      return response;
+      return { user: response.user, session: response.session };
     },
-    onSuccess: async () => {
-      navigate({ to: '/login', replace: true });
+    onSuccess: async (data) => {
+      queryClient.setQueryData(['user'], data.user);
+      queryClient.setQueryData(['session'], data.session);
+      navigate({ to: '/onboarding', replace: true });
     },
   });
   return {

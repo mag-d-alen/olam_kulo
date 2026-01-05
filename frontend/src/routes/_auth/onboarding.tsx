@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { OnboardingPage } from '../../pages/OnboardingPage';
+import { AppRouterContext } from '../../router.types';
 
 /**
  * Onboarding Route Guard
@@ -10,9 +11,9 @@ import { OnboardingPage } from '../../pages/OnboardingPage';
  * If user has already completed onboarding, redirect to dashboard.
  */
 export const Route = createFileRoute('/_auth/onboarding')({
-  beforeLoad: ({ context }) => {
+  loader: async ({ context }: { context: AppRouterContext }) => {
     const user = context.user;
-    if (!user?.homeCity) {
+    if (user && user?.homeCity) {
       throw redirect({ to: '/dashboard', replace: true });
     }
   },
