@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useGetDestination } from '../features/destinationChoice/hooks/useGetDestination';
-import type { Destination } from '../features/destinationChoice/api/types';
 import { useSetDestination } from '../features/destinationChoice/hooks/useSetDestination';
-import { useAuthContext } from '../authentication/contexts/AuthContext';
 import { useUser } from '../authentication/hooks/useAuth';
 
 export const DestinationWheel = () => {
@@ -10,8 +8,6 @@ export const DestinationWheel = () => {
   const { mutate: setDestination } = useSetDestination();
   const { user } = useUser();
   const [isSpinning, setIsSpinning] = useState(false);
-  // const [selectedDestination, setSelectedDestination] =
-  //   useState<Destination | null>(null);
   const [rotation, setRotation] = useState(0);
 
   const wheelData = useMemo(() => {
@@ -33,8 +29,6 @@ export const DestinationWheel = () => {
     if (!wheelData || isSpinning) return;
 
     setIsSpinning(true);
-    // setSelectedDestination(null);
-
     const fullSpins = 5 + Math.random() * 5;
     const randomAngle = Math.random() * 360;
     const totalRotation = fullSpins * 360 + randomAngle;

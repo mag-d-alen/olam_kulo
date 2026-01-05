@@ -13,8 +13,11 @@ type AddHomeCityResponse = {
 export const addHomeCity = async (
   homeCity: string
 ): Promise<AddHomeCityResponse> => {
+  const trimmedHomeCity = homeCity.trim();
+  const formattedHomeCity =
+    trimmedHomeCity.charAt(0).toUpperCase() + trimmedHomeCity.slice(1);
   const response = await apiClient.post('/onboarding/addHomeCity', {
-    homeCity,
+    homeCity: formattedHomeCity,
   });
   return response.data;
 };
