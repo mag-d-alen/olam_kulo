@@ -13,6 +13,7 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as AuthOnboardingRouteImport } from './routes/_auth/onboarding'
+import { Route as AuthJourneyTrackerRouteImport } from './routes/_auth/journeyTracker'
 import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
 import { Route as Auth_layoutRouteImport } from './routes/_auth/__layout'
 
@@ -36,6 +37,11 @@ const AuthOnboardingRoute = AuthOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthJourneyTrackerRoute = AuthJourneyTrackerRouteImport.update({
+  id: '/_auth/journeyTracker',
+  path: '/journeyTracker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthDashboardRoute = AuthDashboardRouteImport.update({
   id: '/_auth/dashboard',
   path: '/dashboard',
@@ -48,6 +54,7 @@ const Auth_layoutRoute = Auth_layoutRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthDashboardRoute
+  '/journeyTracker': typeof AuthJourneyTrackerRoute
   '/onboarding': typeof AuthOnboardingRoute
   '/login': typeof PublicLoginRoute
   '/signup': typeof PublicSignupRoute
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/dashboard': typeof AuthDashboardRoute
+  '/journeyTracker': typeof AuthJourneyTrackerRoute
   '/onboarding': typeof AuthOnboardingRoute
   '/login': typeof PublicLoginRoute
   '/signup': typeof PublicSignupRoute
@@ -64,6 +72,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth/__layout': typeof Auth_layoutRoute
   '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/journeyTracker': typeof AuthJourneyTrackerRoute
   '/_auth/onboarding': typeof AuthOnboardingRoute
   '/_public/login': typeof PublicLoginRoute
   '/_public/signup': typeof PublicSignupRoute
@@ -71,13 +80,26 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/dashboard' | '/onboarding' | '/login' | '/signup' | '/'
+  fullPaths:
+    | '/dashboard'
+    | '/journeyTracker'
+    | '/onboarding'
+    | '/login'
+    | '/signup'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/dashboard' | '/onboarding' | '/login' | '/signup' | '/'
+  to:
+    | '/dashboard'
+    | '/journeyTracker'
+    | '/onboarding'
+    | '/login'
+    | '/signup'
+    | '/'
   id:
     | '__root__'
     | '/_auth/__layout'
     | '/_auth/dashboard'
+    | '/_auth/journeyTracker'
     | '/_auth/onboarding'
     | '/_public/login'
     | '/_public/signup'
@@ -87,6 +109,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Auth_layoutRoute: typeof Auth_layoutRoute
   AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthJourneyTrackerRoute: typeof AuthJourneyTrackerRoute
   AuthOnboardingRoute: typeof AuthOnboardingRoute
   PublicLoginRoute: typeof PublicLoginRoute
   PublicSignupRoute: typeof PublicSignupRoute
@@ -123,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth/journeyTracker': {
+      id: '/_auth/journeyTracker'
+      path: '/journeyTracker'
+      fullPath: '/journeyTracker'
+      preLoaderRoute: typeof AuthJourneyTrackerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_auth/dashboard': {
       id: '/_auth/dashboard'
       path: '/dashboard'
@@ -143,6 +173,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   Auth_layoutRoute: Auth_layoutRoute,
   AuthDashboardRoute: AuthDashboardRoute,
+  AuthJourneyTrackerRoute: AuthJourneyTrackerRoute,
   AuthOnboardingRoute: AuthOnboardingRoute,
   PublicLoginRoute: PublicLoginRoute,
   PublicSignupRoute: PublicSignupRoute,

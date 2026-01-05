@@ -13,7 +13,6 @@ export const Route = createFileRoute('/_public/signup')({
     const user = context.user;
 
     if (user) {
-      // User is authenticated, redirect based on onboarding status
       if (user.homeCity) {
         throw redirect({ to: '/dashboard' });
       } else {

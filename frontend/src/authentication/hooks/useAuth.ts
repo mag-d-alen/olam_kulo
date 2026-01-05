@@ -3,15 +3,9 @@ import { sessionManager } from '../../services/session';
 import { authApi, SignUpData } from '../api/authApi';
 import { useNavigate } from '@tanstack/react-router';
 
-export const authKeys = {
-  all: ['auth'] as const,
-  session: () => [...authKeys.all, 'session'] as const,
-  user: () => [...authKeys.all, 'user'] as const,
-};
-
 export const useSession = () => {
   return useQuery({
-    queryKey: authKeys.session(),
+    queryKey: ['session'],
     queryFn: async () => {
       const session = sessionManager.getSession();
       return session ?? null;
@@ -24,15 +18,15 @@ export const useSession = () => {
 export const useUser = () => {
   const { data: session, isLoading: sessionLoading, ...rest } = useSession();
   const { data: userData, isLoading: publicUserLoading } = useQuery({
-    queryKey: [...authKeys.user()],
+    queryKey: ['user'],
     queryFn: async () => {
       if (!session?.access_token) return null;
       const user = await authApi.getUser();
       return user;
     },
     enabled: !!session?.access_token,
+    staleTime: 1000 * 60 * 5,
   });
-  console.log('userData', userData);
   return {
     ...rest,
     user: userData ?? null,
@@ -41,7 +35,6 @@ export const useUser = () => {
 };
 
 export const useSignUp = () => {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
     mutate: signUp,
@@ -53,14 +46,7 @@ export const useSignUp = () => {
       return response;
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: authKeys.user() });
-      await queryClient.refetchQueries({ queryKey: authKeys.session() });
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          navigate({ to: '/signup', replace: true });
-        });
-      });
+      navigate({ to: '/login', replace: true });
     },
   });
   return {
@@ -96,13 +82,9 @@ export const useSignIn = () => {
       return { user: userData, session: response.session };
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(authKeys.user(), data.user);
-      queryClient.setQueryData(authKeys.session(), data.session);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          navigate({ to: '/login', replace: true });
-        });
-      });
+      queryClient.setQueryData(['user'], data.user);
+      queryClient.setQueryData(['session'], data.session);
+      navigate({ to: '/dashboard', replace: true });
     },
   });
   return {
@@ -125,8 +107,8 @@ export const useSignOut = () => {
       await authApi.signOut();
     },
     onSuccess: () => {
-      queryClient.setQueryData(authKeys.session(), null);
-      queryClient.setQueryData(authKeys.user(), null);
+      queryClient.setQueryData(['session'], null);
+      queryClient.setQueryData(['user'], null);
       navigate({ to: '/login' });
     },
   });

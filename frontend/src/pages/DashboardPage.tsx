@@ -1,5 +1,6 @@
 import { DestinationWheel } from '../widgets/DestinationWheel';
 import { useAuthContext } from '../authentication/contexts/AuthContext';
+import { Link } from '@tanstack/react-router';
 
 export const DashboardPage = () => {
   const { user, isLoading } = useAuthContext();
@@ -9,7 +10,15 @@ export const DashboardPage = () => {
   }
 
   if (!user) {
-    return <div>No user found</div>;
+    return (
+      <p>
+        You are not logged in. Please{' '}
+        <Link to="/login" className="text-black-500">
+          login
+        </Link>{' '}
+        to continue.
+      </p>
+    );
   }
 
   return (
@@ -17,15 +26,49 @@ export const DashboardPage = () => {
       <div>
         <h1>Welcome to Olam Kulo</h1>
       </div>
-      <div>{user.email}</div>
-      <div>
-        <h2>You are now in {user.homeCity}</h2>
-        <p>
-          To start your journey, turn the wheel and see what is your next
-          destination!
-        </p>
-        <DestinationWheel />
-      </div>
+      {user.destinationCity ? (
+        <DestinationInfo
+          destinationCity={user.destinationCity}
+          homeCity={user.homeCity ?? ''}
+        />
+      ) : (
+        <NoDestinationInfo homeCity={user.homeCity ?? ''} />
+      )}
+      <DestinationWheel />
+      {user.destinationCity && (
+        <Link to="/journeyTracker">Track your journey</Link>
+      )}
     </>
+  );
+};
+
+type NoDestinationInfoProps = {
+  homeCity: string;
+};
+const NoDestinationInfo = ({ homeCity }: NoDestinationInfoProps) => {
+  return (
+    <div>
+      <h2>
+        You are now in {homeCity}. Turn the wheel to see your next destination!
+      </h2>
+    </div>
+  );
+};
+
+type DestinationInfoProps = {
+  destinationCity: string;
+  homeCity: string;
+};
+
+const DestinationInfo = ({
+  destinationCity,
+  homeCity,
+}: DestinationInfoProps) => {
+  return (
+    <div>
+      <h2>
+        Say goodbye to {homeCity}! Your next destination is {destinationCity}!
+      </h2>
+    </div>
   );
 };

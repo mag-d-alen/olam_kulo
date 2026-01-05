@@ -17,3 +17,17 @@ export class SignInDto {
   @IsString()
   password!: string;
 }
+
+export class GetUserDto {
+  @IsString()
+  userId!: string;
+
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  homeCity?: string;
+
+  @IsString()
+  destinationCity?: string;
+}

@@ -34,6 +34,10 @@ export class AuthService {
     if (error) {
       throw new UnauthorizedException(error.message);
     }
+    const userData = await this.getUserByEmail(email);
+    if (userData) {
+      throw new UnauthorizedException('User already exists');
+    }
     this.accessToken = data.session?.access_token ?? null;
     this.refreshToken = data.session?.refresh_token ?? null;
     this.user = data.user;
@@ -41,7 +45,10 @@ export class AuthService {
     return {
       access_token: this.accessToken,
       refresh_token: this.refreshToken,
-      user: { id: this.user?.id, email: this.user?.email },
+      user: {
+        id: this.user?.id,
+        email: this.user?.email,
+      },
       session: this.session ?? null,
     };
   }
@@ -63,10 +70,18 @@ export class AuthService {
     this.refreshToken = data.session?.refresh_token;
     this.user = data.user;
     this.session = data.session;
+
+    const userData = await this.getUser(this.user.id);
+
     return {
       access_token: this.accessToken,
       refresh_token: this.refreshToken,
-      user: { id: this.user.id, email: this.user.email },
+      user: {
+        id: this.user.id,
+        email: this.user.email,
+        homeCity: userData.homeCity,
+        destinationCity: userData.destinationCity,
+      },
       session: this.session,
     };
   }
@@ -98,7 +113,7 @@ export class AuthService {
       const supabase = this.getAuthClient();
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, email, home_city, home_country')
+        .select('id, email, home_city, destination_city')
         .eq('id', userId)
         .single();
 
@@ -114,13 +129,40 @@ export class AuthService {
         id: userData.id,
         email: userData.email,
         homeCity: userData.home_city ?? null,
-        homeCountry: userData.home_country ?? null,
+        destinationCity: userData.destination_city ?? null,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
       throw new UnauthorizedException((error as Error).message);
+    }
+  }
+
+  async getUserByEmail(email: string) {
+    const supabase = this.getAuthClient();
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, email, home_city, destination_city')
+      .eq('email', email)
+      .single();
+    if (userError) {
+      throw new Error(userError.message);
+    }
+    return userData;
+  }
+
+  async updateUserDestination(userId: string, destination_city: string) {
+    const supabase = this.getAuthClient();
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .update({ destination_city: destination_city })
+      .eq('id', userId)
+      .single();
+    if (userError) {
+      throw new UnauthorizedException(
+        `Error updating user: ${userError.message}`,
+      );
     }
   }
 }

@@ -12,11 +12,8 @@ import { OnboardingPage } from '../../pages/OnboardingPage';
 export const Route = createFileRoute('/_auth/onboarding')({
   beforeLoad: ({ context }) => {
     const user = context.user;
-
-    // User is already authenticated (checked by layout)
-    // If onboarding is already complete, redirect to dashboard
-    if (user?.homeCity) {
-      throw redirect({ to: '/dashboard' });
+    if (!user?.homeCity) {
+      throw redirect({ to: '/dashboard', replace: true });
     }
   },
   component: () => <OnboardingPage />,

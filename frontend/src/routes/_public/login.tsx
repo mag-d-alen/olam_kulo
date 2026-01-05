@@ -11,9 +11,7 @@ import { LoginPage } from '../../pages/LoginPage';
 export const Route = createFileRoute('/_public/login')({
   beforeLoad: ({ context }) => {
     const user = context.user;
-
     if (user) {
-      // User is authenticated, redirect based on onboarding status
       if (user.homeCity) {
         throw redirect({ to: '/dashboard' });
       } else {

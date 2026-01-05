@@ -20,7 +20,12 @@ export interface SignUpResponse {
 
 export interface SignInResponse {
   session: Session | null;
-  user: { id: string; email: string; homeCity: string; homeCountry: string };
+  user: {
+    id: string;
+    email: string;
+    homeCity?: string;
+    destinationCity?: string;
+  };
 }
 
 export const authApi = {
@@ -35,6 +40,7 @@ export const authApi = {
       if (responseData.session) {
         sessionManager.setSession(responseData.session);
       }
+      sessionManager.setSession(responseData.session);
 
       return { session: responseData.session, user: responseData.user };
     } catch (error) {
@@ -55,8 +61,8 @@ export const authApi = {
         user: {
           id: string;
           email: string;
-          homeCity: string;
-          homeCountry: string;
+          homeCity?: string;
+          destinationCity?: string;
         };
         session: Session;
       };

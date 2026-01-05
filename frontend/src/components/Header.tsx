@@ -5,7 +5,7 @@ export const Header = () => {
   const { signOut } = useSignOut();
 
   return (
-    <header className="flex justify-end items-center gap-4 bg-gray-500 p-4 w-full">
+    <header className="sticky top-0 z-10 flex justify-end items-center gap-4 bg-gray-500 p-4 w-full shadow-md backdrop-blur-sm">
       {user ? (
         <div className="flex items-center gap-4 w-full">
           <button onClick={() => signOut()}>Sign out</button>
