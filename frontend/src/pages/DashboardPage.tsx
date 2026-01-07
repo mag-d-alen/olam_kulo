@@ -1,18 +1,13 @@
 import { DestinationWheel } from '../widgets/DestinationWheel';
 import { useAuthContext } from '../authentication/contexts/AuthContext';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export const DashboardPage = () => {
   const { user, isLoading } = useAuthContext();
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return <div>Loading...</div>;
   }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
   return (
     <>
       <div>

@@ -4,71 +4,49 @@ import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { OnboardingPage } from './pages/OnboardingPage';
-import { HomePage } from './pages/HomePage';
 import { useAuthContext } from './authentication/contexts/AuthContext';
+import { JourneyPage } from './pages/JourneyPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthContext();
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  return <>{children}</>;
+  return <OnboardedRoute>{children}</OnboardedRoute>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthContext();
   if (user) {
-    if (user.homeCity) {
-      return <Navigate to="/dashboard" replace />;
-    } else {
-      return <Navigate to="/onboarding" replace />;
-    }
+    return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
 };
 
-const DashboardRoute = () => {
+const OnboardedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthContext();
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (!user.homeCity) {
-    return <Navigate to="/onboarding" replace />;
-  }
-  return <DashboardPage />;
-};
-
-const OnboardingRoute = () => {
-  const { user } = useAuthContext();
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (user.homeCity) {
-    return <Navigate to="/dashboard" replace />;
+  if (user && user.homeCity) {
+    return <>{children}</>;
   }
   return <OnboardingPage />;
 };
 
-const HomeRoute = () => {
+const OnboardingRoute = () => {
   const { user } = useAuthContext();
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  console.log('from onboarding route', user);
+
+  if (user && user.destinationCity) {
+    return <Navigate to="/journeyTracker" replace />;
   }
-  return (
-    <HomePage
-      onboarded={!!user?.homeCity}
-      hasDestination={!!user?.destinationCity}
-    />
-  );
+  return <OnboardingPage />;
 };
 
-// Journey Tracker Route
 const JourneyTrackerRoute = () => {
   const { user } = useAuthContext();
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (user && !user.destinationCity) {
+    return <Navigate to="/dashboard" replace />;
   }
-  return <div>Journey Tracker</div>;
+  return <JourneyPage />;
 };
 
 export const AppRouter = () => {
@@ -91,15 +69,6 @@ export const AppRouter = () => {
             </PublicRoute>
           }
         />
-
-        <Route
-          path="home"
-          element={
-            <ProtectedRoute>
-              <HomeRoute />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="onboarding"
           element={
@@ -112,7 +81,7 @@ export const AppRouter = () => {
           path="dashboard"
           element={
             <ProtectedRoute>
-              <DashboardRoute />
+              <DashboardPage />
             </ProtectedRoute>
           }
         />
@@ -125,7 +94,7 @@ export const AppRouter = () => {
           }
         />
 
-        <Route path="*" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
   );
