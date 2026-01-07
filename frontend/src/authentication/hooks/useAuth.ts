@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sessionManager } from '../../services/session';
 import { authApi, SignUpData } from '../api/authApi';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate } from 'react-router-dom';
 
 export const useSession = () => {
   return useQuery({
@@ -49,7 +49,7 @@ export const useSignUp = () => {
     onSuccess: async (data) => {
       queryClient.setQueryData(['user'], data.user);
       queryClient.setQueryData(['session'], data.session);
-      navigate({ to: '/onboarding', replace: true });
+      navigate('/onboarding', { replace: true });
     },
   });
   return {
@@ -87,7 +87,7 @@ export const useSignIn = () => {
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user);
       queryClient.setQueryData(['session'], data.session);
-      navigate({ to: '/dashboard', replace: true });
+      navigate('/dashboard', { replace: true });
     },
   });
   return {
@@ -112,7 +112,7 @@ export const useSignOut = () => {
     onSuccess: () => {
       queryClient.setQueryData(['session'], null);
       queryClient.setQueryData(['user'], null);
-      navigate({ to: '/login' });
+      navigate('/login');
     },
   });
   return {

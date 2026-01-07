@@ -1,19 +1,19 @@
+import { Outlet } from 'react-router-dom';
 import { HeaderNavigation } from '../widgets/HeaderNavigation';
 import { Loader } from './Loader';
 
 type LayoutProps = {
-  children: React.ReactNode;
   isLoading?: boolean;
 };
 
-export const Layout = ({ children, isLoading = false }: LayoutProps) => {
+export const Layout = ({ isLoading = false }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header>
         <HeaderNavigation />
       </Header>
       <main className="flex-1 pt-16 p-4 min-h-screen">
-        {isLoading ? <Loader /> : children}
+        {isLoading ? <Loader /> : <Outlet />}
       </main>
       <Footer />
     </div>

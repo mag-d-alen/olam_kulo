@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate } from 'react-router-dom';
 import { addHomeCity } from '../api/addHomeCity';
 
 export const useAddHomeCity = () => {
@@ -12,7 +12,7 @@ export const useAddHomeCity = () => {
     },
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['user'] });
-      navigate({ to: '/dashboard' });
+      navigate('/dashboard', { replace: true });
     },
     onError: (error) => {
       console.error('Error adding home city:', error);

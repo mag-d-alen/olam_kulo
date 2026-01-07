@@ -1,5 +1,5 @@
 import { useSignOut, useUser } from '../authentication/hooks/useAuth';
-import { Link } from '@tanstack/react-router';
+import { Link } from 'react-router-dom';
 export const HeaderNavigation = () => {
   const { user } = useUser();
   const { signOut } = useSignOut();

@@ -1,6 +1,6 @@
 import { DestinationWheel } from '../widgets/DestinationWheel';
 import { useAuthContext } from '../authentication/contexts/AuthContext';
-import { Link } from '@tanstack/react-router';
+import { Link, Navigate } from 'react-router-dom';
 
 export const DashboardPage = () => {
   const { user, isLoading } = useAuthContext();
@@ -10,15 +10,7 @@ export const DashboardPage = () => {
   }
 
   if (!user) {
-    return (
-      <p>
-        You are not logged in. Please{' '}
-        <Link to="/login" className="text-black-500">
-          login
-        </Link>{' '}
-        to continue.
-      </p>
-    );
+    return <Navigate to="/login" />;
   }
 
   return (
