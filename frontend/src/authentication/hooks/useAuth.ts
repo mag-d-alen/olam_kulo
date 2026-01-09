@@ -19,11 +19,7 @@ export const useUser = () => {
   const { data: session, isLoading: sessionLoading, ...rest } = useSession();
   const { data: userData, isLoading: publicUserLoading } = useQuery({
     queryKey: ['user'],
-    queryFn: async () => {
-      if (!session?.access_token) return null;
-      const user = await authApi.getUser();
-      return user;
-    },
+    queryFn: () => authApi.getUser(),
     enabled: !!session?.access_token,
     staleTime: 1000 * 60 * 5,
   });
@@ -81,8 +77,8 @@ export const useSignIn = () => {
       if (!response.user.id) {
         throw new Error('Invalid response data');
       }
-      const userData = await authApi.getUser();
-      return { user: userData, session: response.session };
+
+      return { user: response.user, session: response.session };
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user);

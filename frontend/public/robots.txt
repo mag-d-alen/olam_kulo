@@ -1,0 +1,8 @@
+
+User-agent: *
+Disallow: /login/
+Disallow: /signup/
+Disallow: /onboarding/
+Disallow: /dashboard/
+Disallow: /journeyTracker/
+

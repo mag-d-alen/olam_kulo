@@ -52,21 +52,16 @@ export const authApi = {
 
   async signIn(data: SignInData): Promise<SignInResponse> {
     try {
-      const response = await apiClient.post('/auth/signIn', data);
-      const responseData = response.data as {
-        user: {
-          id: string;
-          email: string;
-          homeCity?: string;
-          destinationCity?: string;
-        };
-        session: Session;
-      };
-      if (!responseData.session || !responseData.user.id) {
+      const response = await apiClient.post<SignInResponse>(
+        '/auth/signIn',
+        data
+      );
+
+      if (!response.data.session || !response.data.user.id) {
         throw new Error('Invalid response data');
       }
-      sessionManager.setSession(responseData.session);
-      return { user: responseData.user, session: responseData.session };
+      sessionManager.setSession(response.data.session);
+      return { user: response.data.user, session: response.data.session };
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;

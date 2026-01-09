@@ -1,16 +1,40 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { LoginPage } from './pages/LoginPage';
-import { SignUpPage } from './pages/SignUpPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { OnboardingPage } from './pages/OnboardingPage';
 import { useAuthContext } from './authentication/contexts/AuthContext';
-import { JourneyPage } from './pages/JourneyPage';
+import { lazy, Suspense } from 'react';
+import { Loader } from './components/Loader';
+
+const LazyOnboardingPage = lazy(() =>
+  import('./pages/OnboardingPage').then((module) => ({
+    default: module.OnboardingPage,
+  }))
+);
+const LazyDashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((module) => ({
+    default: module.DashboardPage,
+  }))
+);
+const LazyJourneyPage = lazy(() =>
+  import('./pages/JourneyPage').then((module) => ({
+    default: module.JourneyPage,
+  }))
+);
+const LazyLoginPage = lazy(() =>
+  import('./pages/LoginPage').then((module) => ({ default: module.LoginPage }))
+);
+const LazySignUpPage = lazy(() =>
+  import('./pages/SignUpPage').then((module) => ({
+    default: module.SignUpPage,
+  }))
+);
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthContext();
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  if (user && !user.homeCity) {
+    return <Navigate to="/onboarding" replace />;
   }
   return <OnboardedRoute>{children}</OnboardedRoute>;
 };
@@ -28,17 +52,23 @@ const OnboardedRoute = ({ children }: { children: React.ReactNode }) => {
   if (user && user.homeCity) {
     return <>{children}</>;
   }
-  return <OnboardingPage />;
+  return (
+    <Suspense fallback={<Loader />}>
+      <LazyOnboardingPage />
+    </Suspense>
+  );
 };
 
 const OnboardingRoute = () => {
   const { user } = useAuthContext();
-  console.log('from onboarding route', user);
-
   if (user && user.destinationCity) {
     return <Navigate to="/journeyTracker" replace />;
   }
-  return <OnboardingPage />;
+  return (
+    <Suspense fallback={<Loader />}>
+      <LazyOnboardingPage />
+    </Suspense>
+  );
 };
 
 const JourneyTrackerRoute = () => {
@@ -46,7 +76,11 @@ const JourneyTrackerRoute = () => {
   if (user && !user.destinationCity) {
     return <Navigate to="/dashboard" replace />;
   }
-  return <JourneyPage />;
+  return (
+    <Suspense fallback={<Loader />}>
+      <LazyJourneyPage />
+    </Suspense>
+  );
 };
 
 export const AppRouter = () => {
@@ -57,7 +91,9 @@ export const AppRouter = () => {
           path="login"
           element={
             <PublicRoute>
-              <LoginPage />
+              <Suspense fallback={<Loader />}>
+                <LazyLoginPage />
+              </Suspense>
             </PublicRoute>
           }
         />
@@ -65,7 +101,9 @@ export const AppRouter = () => {
           path="signup"
           element={
             <PublicRoute>
-              <SignUpPage />
+              <Suspense fallback={<Loader />}>
+                <LazySignUpPage />
+              </Suspense>
             </PublicRoute>
           }
         />
@@ -73,7 +111,9 @@ export const AppRouter = () => {
           path="onboarding"
           element={
             <ProtectedRoute>
-              <OnboardingRoute />
+              <Suspense fallback={<Loader />}>
+                <OnboardingRoute />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -81,7 +121,9 @@ export const AppRouter = () => {
           path="dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <Suspense fallback={<Loader />}>
+                <LazyDashboardPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -89,7 +131,9 @@ export const AppRouter = () => {
           path="journeyTracker"
           element={
             <ProtectedRoute>
-              <JourneyTrackerRoute />
+              <Suspense fallback={<Loader />}>
+                <JourneyTrackerRoute />
+              </Suspense>
             </ProtectedRoute>
           }
         />
