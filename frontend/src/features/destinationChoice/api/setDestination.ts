@@ -5,9 +5,7 @@ export const setDestination = async (destination: {
   country: string;
 }) => {
   try {
-    const response = await apiClient.post('/places/setDestination', {
-      destination,
-    });
+    const response = await apiClient.post('/places/setDestination', { destination });
     return response.data;
   } catch (error) {
     console.error('Error setting destination:', error);

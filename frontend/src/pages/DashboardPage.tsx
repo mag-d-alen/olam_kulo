@@ -1,30 +1,25 @@
 import { DestinationWheel } from '../widgets/DestinationWheel';
-import { useAuthContext } from '../authentication/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { useUser } from '../authentication/hooks/useAuth';
 
 export const DashboardPage = () => {
-  const { user, isLoading } = useAuthContext();
-
-  if (isLoading || !user) {
-    return <div>Loading...</div>;
-  }
+  const { user } = useUser();
+  const { destinationCity = '', homeCity = '' } = user!;
   return (
     <>
       <div>
         <h1>Welcome to Olam Kulo</h1>
       </div>
-      {user.destinationCity ? (
+      {destinationCity ? (
         <DestinationInfo
-          destinationCity={user.destinationCity}
-          homeCity={user.homeCity ?? ''}
+          destinationCity={destinationCity}
+          homeCity={homeCity}
         />
       ) : (
-        <NoDestinationInfo homeCity={user.homeCity ?? ''} />
+        <NoDestinationInfo homeCity={homeCity} />
       )}
       <DestinationWheel />
-      {user.destinationCity && (
-        <Link to="/journeyTracker">Track your journey</Link>
-      )}
+      {destinationCity && <Link to="/journeyTracker">Track your journey</Link>}
     </>
   );
 };

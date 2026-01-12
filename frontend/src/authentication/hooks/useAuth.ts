@@ -31,8 +31,8 @@ export const useUser = () => {
 };
 
 export const useSignUp = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const {
     mutate: signUp,
     isPending,
