@@ -61,10 +61,10 @@ export const authApi = {
         throw new Error('Invalid response data');
       }
       sessionManager.setSession(response.data.session);
+
       return { user: response.data.user, session: response.data.session };
     } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
+      throw new Error('Error signing in');
     }
   },
   async signOut(): Promise<void> {

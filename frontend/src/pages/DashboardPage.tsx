@@ -4,22 +4,21 @@ import { useUser } from '../authentication/hooks/useAuth';
 
 export const DashboardPage = () => {
   const { user } = useUser();
-  const { destinationCity = '', homeCity = '' } = user!;
+
+  const { city = '' } = user!.destination ?? {};
+  const homeCity = user!.homeCity ?? '';
   return (
     <>
       <div>
         <h1>Welcome to Olam Kulo</h1>
       </div>
-      {destinationCity ? (
-        <DestinationInfo
-          destinationCity={destinationCity}
-          homeCity={homeCity}
-        />
+      {city ? (
+        <DestinationInfo destinationCity={city} homeCity={homeCity} />
       ) : (
         <NoDestinationInfo homeCity={homeCity} />
       )}
       <DestinationWheel />
-      {destinationCity && <Link to="/journeyTracker">Track your journey</Link>}
+      {city && <Link to="/journeyTracker">Track your journey</Link>}
     </>
   );
 };

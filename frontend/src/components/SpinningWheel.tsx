@@ -21,7 +21,7 @@ type SpinningWheelProps = {
   isSpinning: boolean;
   setIsSpinning: (isSpinning: boolean) => void;
   wheelData: WheelSegment[];
-  onSpin: (value: { city: string; country: string }) => void;
+  onSpin: (value: { city: string; country: string , id: string }) => void;
 };
 
 export const SpinningWheel = ({

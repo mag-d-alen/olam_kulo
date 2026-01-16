@@ -68,7 +68,7 @@ export const DashboardRoute = () => {
 
 export const JourneyTrackerRoute = () => {
   const { user } = useUser();
-  if (user && !user.destinationCity) {
+  if (user && !user.destination?.city) {
     return <Navigate to="/dashboard" replace />;
   }
   return (

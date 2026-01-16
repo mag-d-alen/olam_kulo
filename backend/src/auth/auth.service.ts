@@ -5,7 +5,12 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
-import { Session, User, SupabaseClient } from '@supabase/supabase-js';
+import {
+  Session,
+  User,
+  SupabaseClient,
+  PostgrestError,
+} from '@supabase/supabase-js';
 import { validateEmail, validatePassword } from './utils/validation.util';
 
 @Injectable()
@@ -39,7 +44,7 @@ export class AuthService {
     });
 
     if (error) {
-      throw new UnauthorizedException(error.message);
+      throw error;
     }
 
     this.accessToken = data.session?.access_token ?? null;
@@ -85,8 +90,16 @@ export class AuthService {
       user: {
         id: this.user.id,
         email: this.user.email,
-        homeCity: userData.homeCity,
-        destinationCity: userData.destinationCity,
+        homeCity: userData?.homeCity ?? null,
+        destination: userData?.destination
+          ? {
+              id: userData.destination.id,
+              city: userData.destination.city,
+              country: userData?.destination?.country ?? null,
+              lat: userData?.destination?.lat ?? 0,
+              lng: userData?.destination?.lng ?? 0,
+            }
+          : null,
       },
       session: this.session,
     };
@@ -102,34 +115,71 @@ export class AuthService {
 
     return { message: 'Successfully signed out' };
   }
+
   async getUser(userId: string) {
     try {
       const supabase = this.getAuthClient();
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, email, home_city, destination_city')
+        .select(
+          'home_city, destination_city, destination_country, destination_id',
+        )
         .eq('id', userId)
         .single();
 
       if (userError) {
-        throw new UnauthorizedException(
-          `Error getting user data: ${userError.message}`,
-        );
+        throw new PostgrestError({
+          message: userError.message,
+          details: userError.details,
+          hint: userError.hint,
+          code: userError.code,
+        });
       }
       if (!userData) {
-        throw new UnauthorizedException('User not found');
+        throw new PostgrestError({
+          message: 'User not found',
+          details: '',
+          hint: 'User not found',
+          code: '404',
+        });
       }
-      return {
-        id: userData.id,
-        email: userData.email,
+      let placeData = null;
+      if (userData.destination_id) {
+        const { data: place, error: placeError } = await supabase
+          .from('places')
+          .select('lat, lng')
+          .eq('id', userData.destination_id)
+          .maybeSingle();
+
+        if (placeError) {
+          throw new PostgrestError({
+            message: placeError.message,
+            details: placeError.details,
+            hint: placeError.hint,
+            code: placeError.code,
+          });
+        }
+        placeData = place;
+      }
+
+      const user = {
+        id: userId,
         homeCity: userData.home_city ?? null,
-        destinationCity: userData.destination_city ?? null,
+        destination:
+          userData.destination_id && placeData
+            ? {
+                id: userData.destination_id,
+                city: userData.destination_city ?? null,
+                country: userData.destination_country ?? null,
+                lat: 0,
+                lng: 0,
+              }
+            : null,
       };
+      return user;
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new UnauthorizedException((error as Error).message);
+      console.error('Error getting user:', error);
+      throw error;
     }
   }
 
@@ -146,11 +196,21 @@ export class AuthService {
     return userData;
   }
 
-  async updateUserDestination(userId: string, destination_city: string) {
+  async updateUserDestination({
+    userId,
+    destination,
+  }: {
+    userId: string;
+    destination: { city: string; country: string; id: string };
+  }) {
     const supabase = this.getAuthClient();
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .update({ destination_city: destination_city })
+      .update({
+        destination_id: destination.id,
+        destination_city: destination.city,
+        destination_country: destination.country,
+      })
       .eq('id', userId)
       .single();
     if (userError) {

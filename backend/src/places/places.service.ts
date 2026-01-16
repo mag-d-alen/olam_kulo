@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 @Injectable()
 export class PlacesService {
@@ -25,12 +25,13 @@ export class PlacesService {
     const supabase = this.authService.getAuthClient();
     const { data, error } = await supabase
       .from('user_destinations')
-      .select('city, country')
+      .select('city, country, destination_id')
       .eq('user_id', userId);
     if (error) throw error;
     return data.map((place) => ({
       city: place.city,
       country: place.country,
+      id: place.destination_id,
     }));
   }
 
@@ -38,9 +39,10 @@ export class PlacesService {
     destination,
     userId,
   }: {
-    destination: { city: string; country: string };
+    destination: { city: string; country: string; id: string };
     userId: string;
   }) {
+    console.log(destination);
     const supabase = this.authService.getAuthClient();
     const { error: userError } = await supabase
       .from('user_destinations')
@@ -48,15 +50,24 @@ export class PlacesService {
         user_id: userId,
         destination_city: destination.city,
         destination_country: destination.country,
+        destination_id: destination.id,
       })
       .eq('user_id', userId)
       .single();
     if (userError) throw userError;
     try {
-      await this.authService.updateUserDestination(userId, destination.city);
+      await this.authService.updateUserDestination({
+        userId,
+        destination: {
+          city: destination.city,
+          country: destination.country,
+          id: destination.id,
+        },
+      });
     } catch (error) {
       throw error;
     }
+    console.log('YAAY');
     return { message: 'Destination set successfully' };
   }
 
@@ -64,16 +75,39 @@ export class PlacesService {
     const supabase = this.authService.getAuthClient();
     const { data, error } = await supabase
       .from('user_destinations')
-      .select('destination_city, destination_country')
+      .select('*')
       .eq('user_id', userId);
     if (error) throw error;
     const destinations = data.map((place) => ({
       city: place.destination_city,
       country: place.destination_country,
+      id: place.destination_id,
     }));
     return {
       cities: destinations.map((destination) => destination.city),
       countries: destinations.map((destination) => destination.country),
+      ids: destinations.map((destination) => destination.id),
     };
+  }
+
+  async getHomeCityData(city: string) {
+    const data = await this.getPlaceData(city);
+    return data;
+  }
+
+  async getDestinationCityData(city: string) {
+    const data = await this.getPlaceData(city);
+    return data;
+  }
+
+  private async getPlaceData(cityId: string) {
+    const supabase = this.authService.getAuthClient();
+    const { data, error } = await supabase
+      .from('places')
+      .select('*')
+      .eq('id', cityId)
+      .single();
+    if (error) throw error;
+    return data;
   }
 }

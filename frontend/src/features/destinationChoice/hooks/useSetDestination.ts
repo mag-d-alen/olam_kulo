@@ -4,7 +4,7 @@ import { setDestination } from '../api/setDestination';
 export const useSetDestination = () => {
   const queryClient = useQueryClient();
   const { mutate, isPending, error } = useMutation({
-    mutationFn: async (destination: { city: string; country: string }) => {
+    mutationFn: async (destination: { city: string; country: string, id: string }) => {
       return setDestination(destination);
     },
     onSuccess: () => {

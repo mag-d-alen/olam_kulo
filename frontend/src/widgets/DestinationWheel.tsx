@@ -17,7 +17,7 @@ export const DestinationWheel = () => {
       startAngle: (360 / places.length) * index,
       endAngle: (360 / places.length) * (index + 1),
       label: place.city,
-      value: { city: place.city, country: place.country },
+      value: { city: place.city, country: place.country, id: place.id },
     }));
   }, [places]);
 
@@ -42,18 +42,20 @@ export const DestinationWheel = () => {
     <div className="flex flex-col items-center gap-6 p-8">
       {places && (
         <SpinningWheel
-          showSpinButton={!user?.destinationCity}
+          showSpinButton={!user?.destination?.city}
           wheelData={wheelData}
-          onSpin={(value: { city: string; country: string }) =>
-            setDestination(value)
-          }
+          onSpin={(value: {
+            city: string;
+            country: string;
+            id: string;
+          }) => setDestination(value)}
           isSpinning={isSpinning}
           setIsSpinning={setIsSpinning}
         />
       )}
-      {user?.destinationCity && !isSpinning && (
+      {user?.destination?.city && !isSpinning && (
         <p className="flex font-bold text-center">
-          🎉 {user.destinationCity} 🎉
+          🎉 {user.destination.city} 🎉
         </p>
       )}
     </div>

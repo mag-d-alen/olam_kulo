@@ -15,8 +15,8 @@ import { SupabaseAuthGuard } from 'src/auth/guards/supabase-auth.guard';
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
 
-    @Get('all')
-    @UseGuards(SupabaseAuthGuard)
+  @Get('all')
+  @UseGuards(SupabaseAuthGuard)
   async getAllPlaces(@CurrentUser('id') userId: string) {
     return this.placesService.getAllPlaces(userId);
   }
@@ -29,12 +29,13 @@ export class PlacesController {
   @Post('setDestination')
   @UseGuards(SupabaseAuthGuard)
   async setDestination(
-    @Body() body: { destination: { city: string; country: string } },
+    @Body()
+    body: { city: string; country: string; id: string },
     @CurrentUser('id') userId: string,
   ) {
     try {
       return this.placesService.setDestination({
-        destination: body.destination,
+        destination: body,
         userId: userId,
       });
     } catch (error) {

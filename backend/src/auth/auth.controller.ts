@@ -12,7 +12,6 @@ import { SignInDto, SignUpDto } from './dto/auth.dto';
 import { SupabaseAuthGuard } from './guards/supabase-auth.guard';
 import { SetAuthTokenInterceptor } from './interceptors/set-auth-token.interceptor';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { User } from '@supabase/supabase-js';
 
 @Controller('auth')
 export class AuthController {
