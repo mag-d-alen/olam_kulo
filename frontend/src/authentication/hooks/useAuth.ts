@@ -21,7 +21,7 @@ export const useUser = () => {
     queryKey: ['user'],
     queryFn: () => authApi.getUser(),
     enabled: !!session?.access_token,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 10,
   });
   return {
     ...rest,

@@ -5,7 +5,7 @@ import { useUser } from '../authentication/hooks/useAuth';
 import { SpinningWheel } from '../components/SpinningWheel';
 
 export const DestinationWheel = () => {
-  const places = useGetDestination();
+  const {places} = useGetDestination();
   const { mutate: setDestination } = useSetDestination();
   const { user } = useUser();
   const [isSpinning, setIsSpinning] = useState(false);
@@ -21,7 +21,7 @@ export const DestinationWheel = () => {
     }));
   }, [places]);
 
-  if (!places || places.length === 0) {
+  if (!places || places?.length === 0) {
     return (
       <div className="text-center p-8">
         <p className="text-gray-500">No destinations available</p>

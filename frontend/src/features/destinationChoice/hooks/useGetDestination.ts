@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { getDestinations } from '../api/getDestinations';
+import { useAuthContext } from '../../../authentication/contexts/AuthContext';
 
 export const useGetDestination = () => {
-  const { data: places } = useQuery({
+  const { session } = useAuthContext();
+  const { data: places, isLoading } = useQuery({
     queryKey: ['places'],
     queryFn: () => getDestinations(),
+    enabled: !!session?.access_token,
   });
-  return places;
+  return { places, isLoading };
 };

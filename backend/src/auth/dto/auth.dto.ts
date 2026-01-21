@@ -5,7 +5,29 @@ import {
   MinLength,
   MaxLength,
   Matches,
+  IsNumber,
 } from 'class-validator';
+
+export class PlaceDto {
+  @IsString()
+  id!: string;
+  @IsString()
+  city!: string;
+  @IsString()
+  country!: string;
+  @IsNumber()
+  lat!: number;
+  @IsNumber()
+  lng!: number;
+}
+export class UserDto {
+  @IsString()
+  id!: string;
+  @IsString()
+  homeCity!: PlaceDto;
+  @IsString()
+  destination!: PlaceDto;
+}
 
 export class SignUpDto {
   @IsEmail({}, { message: 'Invalid email format' })

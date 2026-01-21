@@ -1,23 +1,12 @@
+import { Place } from '../../../types';
 import { apiClient } from '../../../services/api';
 
-type AddHomeCityResponse = {
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    home_city: string | null;
-    home_country: string | null;
-  };
-};
-
-export const addHomeCity = async (
-  homeCity: string
-): Promise<AddHomeCityResponse> => {
-  const trimmedHomeCity = homeCity.trim();
-  const formattedHomeCity =
-    trimmedHomeCity.charAt(0).toUpperCase() + trimmedHomeCity.slice(1);
+export const addHomeCity = async (homeCityData: Place): Promise<void> => {
   const response = await apiClient.post('/onboarding/addHomeCity', {
-    homeCity: formattedHomeCity,
+    city: homeCityData.city.trim(),
+    country: homeCityData.country.trim(),
+    lat: homeCityData.lat,
+    lng: homeCityData.lng,
   });
   return response.data;
 };

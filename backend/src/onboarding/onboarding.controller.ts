@@ -19,11 +19,17 @@ export class OnboardingController {
 
   @Post('addHomeCity')
   async addHomeCity(
-    @Body() body: { homeCity: string },
+    @Body() body: { city: string; country: string; lat: number; lng: number },
     @CurrentUser('id') userId: string,
   ) {
     try {
-      return this.onboardingService.addHomeCity({homeCity: body.homeCity, userId: userId});
+      return this.onboardingService.addHomeCity({
+        city: body.city,
+        country: body.country,
+        lat: body.lat,
+        lng: body.lng,
+        userId: userId,
+      });
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;

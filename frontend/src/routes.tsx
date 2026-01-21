@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Loader } from './components/Loader';
-import { useUser } from './authentication/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import { useAuthContext } from './authentication/contexts/AuthContext';
 
 const LazyOnboardingPage = lazy(() =>
   import('./pages/OnboardingPage').then((module) => ({
@@ -19,7 +19,6 @@ const LazyJourneyPage = lazy(() =>
   }))
 );
 
-
 export const LazyLoginPage = lazy(() =>
   import('./pages/LoginPage').then((module) => ({ default: module.LoginPage }))
 );
@@ -29,10 +28,9 @@ export const LazySignUpPage = lazy(() =>
   }))
 );
 
-
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useUser();
-  if (!user) {
+  const { user, isLoading } = useAuthContext();
+  if (!user && !isLoading) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
@@ -43,36 +41,36 @@ export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const OnboardingRoute = () => {
-  const { user } = useUser();
-  if (user && user.homeCity) {
+  const { user, isLoading } = useAuthContext();
+  if (user && user.homeCity?.city) {
     return <Navigate to="/dashboard" replace />;
   }
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={isLoading ? <Loader /> : null}>
       <LazyOnboardingPage />
     </Suspense>
   );
 };
 
 export const DashboardRoute = () => {
-  const { user } = useUser();
-  if (user && !user.homeCity) {
+  const { user, isLoading } = useAuthContext();
+  if (user && !user.homeCity?.city) {
     return <Navigate to="/onboarding" replace />;
   }
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={isLoading ? <Loader /> : null}>
       <LazyDashboardPage />
     </Suspense>
   );
 };
 
 export const JourneyTrackerRoute = () => {
-  const { user } = useUser();
+  const { user, isLoading } = useAuthContext();
   if (user && !user.destination?.city) {
     return <Navigate to="/dashboard" replace />;
   }
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={isLoading ? <Loader /> : null}>
       <LazyJourneyPage />
     </Suspense>
   );

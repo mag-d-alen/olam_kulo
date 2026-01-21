@@ -42,7 +42,6 @@ export class PlacesService {
     destination: { city: string; country: string; id: string };
     userId: string;
   }) {
-    console.log(destination);
     const supabase = this.authService.getAuthClient();
     const { error: userError } = await supabase
       .from('user_destinations')
@@ -55,19 +54,7 @@ export class PlacesService {
       .eq('user_id', userId)
       .single();
     if (userError) throw userError;
-    try {
-      await this.authService.updateUserDestination({
-        userId,
-        destination: {
-          city: destination.city,
-          country: destination.country,
-          id: destination.id,
-        },
-      });
-    } catch (error) {
-      throw error;
-    }
-    console.log('YAAY');
+
     return { message: 'Destination set successfully' };
   }
 
@@ -75,13 +62,11 @@ export class PlacesService {
     const supabase = this.authService.getAuthClient();
     const { data, error } = await supabase
       .from('user_destinations')
-      .select('*')
+      .select('*, places(*)')
       .eq('user_id', userId);
     if (error) throw error;
     const destinations = data.map((place) => ({
-      city: place.destination_city,
-      country: place.destination_country,
-      id: place.destination_id,
+      ...place.places,
     }));
     return {
       cities: destinations.map((destination) => destination.city),

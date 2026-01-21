@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { useSession, useUser } from '../hooks/useAuth';
-import { User } from '../types';
+import { User } from '../../types';
 import { Session } from '../../services/session';
 
 interface AuthContextType {

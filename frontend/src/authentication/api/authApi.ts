@@ -1,6 +1,6 @@
 import { apiClient } from '../../services/api';
 import { sessionManager, Session } from '../../services/session';
-import { User } from '../types';
+import { User } from '../../types';
 
 export interface SignUpData {
   email: string;
@@ -72,8 +72,7 @@ export const authApi = {
       await apiClient.post('/auth/signOut');
       sessionManager.clearSession();
     } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
+      throw new Error('Error signing out: ' + error);
     }
   },
 };
