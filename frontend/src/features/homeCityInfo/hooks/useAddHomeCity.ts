@@ -2,13 +2,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { addHomeCity } from '../api/addHomeCity';
 
+type HomeCityData = {
+  city: string;
+  country: string;
+  lat: number;
+  lng: number;
+};
+
 export const useAddHomeCity = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: async (homeCity: string) => {
-      return addHomeCity(homeCity);
+    mutationFn: async (homeCityData: HomeCityData) => {
+      return addHomeCity(homeCityData);
     },
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['user'] });

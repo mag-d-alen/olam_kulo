@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { SignInDto, SignUpDto } from './dto/auth.dto';
+import { PlaceDto, SignInDto, SignUpDto, UserDto } from './dto/auth.dto';
 import {
   Session,
   User,
@@ -83,23 +83,33 @@ export class AuthService {
     this.session = data.session;
 
     const userData = await this.getUser(this.user.id);
-
+    let emptyPlace = {
+      id: '',
+      city: '',
+      country: '',
+      lat: 0,
+      lng: 0,
+    };
     return {
       access_token: this.accessToken,
       refresh_token: this.refreshToken,
       user: {
         id: this.user.id,
         email: this.user.email,
-        homeCity: userData?.homeCity ?? null,
-        destination: userData?.destination
-          ? {
-              id: userData.destination.id,
-              city: userData.destination.city,
-              country: userData?.destination?.country ?? null,
-              lat: userData?.destination?.lat ?? 0,
-              lng: userData?.destination?.lng ?? 0,
-            }
-          : null,
+        homeCity: {
+          id: userData?.homeCity.id ?? emptyPlace.id,
+          city: userData?.homeCity?.city ?? emptyPlace.city,
+          country: userData?.homeCity?.country ?? emptyPlace.country,
+          lat: userData?.homeCity?.lat ?? emptyPlace.lat,
+          lng: userData?.homeCity?.lng ?? emptyPlace.lng,
+        },
+        destination: {
+          id: userData?.destination.id ?? emptyPlace.id,
+          city: userData?.destination?.city ?? emptyPlace.city,
+          country: userData?.destination?.country ?? emptyPlace.country,
+          lat: userData?.destination?.lat ?? emptyPlace.lat,
+          lng: userData?.destination?.lng ?? emptyPlace.lng,
+        },
       },
       session: this.session,
     };
@@ -117,65 +127,71 @@ export class AuthService {
   }
 
   async getUser(userId: string) {
+    const emptyPlace = {
+      id: '',
+      city: '',
+      country: '',
+      lat: 0,
+      lng: 0,
+    };
     try {
       const supabase = this.getAuthClient();
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select(
-          'home_city, destination_city, destination_country, destination_id',
-        )
-        .eq('id', userId)
-        .single();
 
-      if (userError) {
-        throw new PostgrestError({
-          message: userError.message,
-          details: userError.details,
-          hint: userError.hint,
-          code: userError.code,
-        });
-      }
-      if (!userData) {
-        throw new PostgrestError({
-          message: 'User not found',
-          details: '',
-          hint: 'User not found',
-          code: '404',
-        });
-      }
-      let placeData = null;
-      if (userData.destination_id) {
-        const { data: place, error: placeError } = await supabase
-          .from('places')
-          .select('lat, lng')
-          .eq('id', userData.destination_id)
-          .maybeSingle();
+      const { data: homeCityData, error: homeCityError } = await supabase
+        .from('user_home')
+        .select('places(*)')
+        .eq('user_id', userId);
 
-        if (placeError) {
-          throw new PostgrestError({
-            message: placeError.message,
-            details: placeError.details,
-            hint: placeError.hint,
-            code: placeError.code,
-          });
+      let homeCity = emptyPlace;
+      if (homeCityData && homeCityData.length > 0) {
+        const firstRow = homeCityData[0];
+        if (firstRow.places) {
+          homeCity = Array.isArray(firstRow.places)
+            ? firstRow.places[0] || emptyPlace
+            : firstRow.places;
         }
-        placeData = place;
       }
 
-      const user = {
+      if (homeCityError) {
+        throw new PostgrestError({
+          message: homeCityError.message,
+          details: homeCityError.details,
+          hint: homeCityError.hint,
+          code: homeCityError.code,
+        });
+      }
+
+      const { data: lastDestination, error: destinationError } = await supabase
+        .from('user_destinations')
+        .select('destination_id, places(*)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      let destination = emptyPlace;
+      if (lastDestination && lastDestination.length > 0) {
+        const firstRow = lastDestination[0];
+        if (firstRow.places) {
+          destination = Array.isArray(firstRow.places)
+            ? firstRow.places[0] || emptyPlace
+            : firstRow.places;
+        }
+      }
+      if (destinationError) {
+        throw new PostgrestError({
+          message: destinationError.message,
+          details: destinationError.details,
+          hint: destinationError.hint,
+          code: destinationError.code,
+        });
+      }
+
+      const user: UserDto = {
         id: userId,
-        homeCity: userData.home_city ?? null,
-        destination:
-          userData.destination_id && placeData
-            ? {
-                id: userData.destination_id,
-                city: userData.destination_city ?? null,
-                country: userData.destination_country ?? null,
-                lat: 0,
-                lng: 0,
-              }
-            : null,
+        homeCity: homeCity,
+        destination: destination,
       };
+
       return user;
     } catch (error) {
       console.error('Error getting user:', error);
@@ -201,22 +217,26 @@ export class AuthService {
     destination,
   }: {
     userId: string;
-    destination: { city: string; country: string; id: string };
+    destination: {
+      city: string;
+      country: string;
+      id: string;
+    };
   }) {
     const supabase = this.getAuthClient();
-    const { data: userData, error: userError } = await supabase
-      .from('users')
+    const { error: userError } = await supabase
+      .from('user_destinations')
       .update({
         destination_id: destination.id,
         destination_city: destination.city,
         destination_country: destination.country,
       })
-      .eq('id', userId)
-      .single();
+      .eq('id', userId);
     if (userError) {
       throw new UnauthorizedException(
         `Error updating user: ${userError.message}`,
       );
     }
+    return { message: 'Destination updated successfully' };
   }
 }
