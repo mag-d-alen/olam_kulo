@@ -23,13 +23,9 @@ export class OnboardingController {
     @CurrentUser('id') userId: string,
   ) {
     try {
-      return this.onboardingService.addHomeCity({
-        city: body.city,
-        country: body.country,
-        lat: body.lat,
-        lng: body.lng,
-        userId: userId,
-      });
+      return this.onboardingService.addHomeCity(
+        {...body, userId: userId},
+      );
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;

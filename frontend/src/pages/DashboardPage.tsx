@@ -1,6 +1,6 @@
-import { DestinationWheel } from '../widgets/DestinationWheel';
-import { Link } from 'react-router-dom';
 import { useAuthContext } from '../authentication/contexts/AuthContext';
+import { DestinationWheel } from '../features/destinationChoice/DestinationWheel';
+import { JourneyMap } from '../features/showJourney/JourneyMap';
 
 export const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -31,7 +31,7 @@ export const DashboardPage = () => {
         <NoDestinationInfo homeCity={homeCity.city} />
       )}
       <DestinationWheel />
-      {destination.city && <Link to="/journeyTracker">Track your journey</Link>}
+      <JourneyMap />
     </>
   );
 };

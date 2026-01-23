@@ -14,7 +14,7 @@ const LazyDashboardPage = lazy(() =>
   }))
 );
 const LazyJourneyPage = lazy(() =>
-  import('./pages/JourneyPage').then((module) => ({
+  import('./features/showJourney/JourneyMap').then((module) => ({
     default: module.JourneyPage,
   }))
 );

@@ -23,10 +23,8 @@ export class OnboardingService {
   }) {
     const supabase = this.authService.getAuthClient();
 
-    // First, check if place exists in places table, if not create it
     let placeId: string | null = null;
 
-    // Check if place already exists
     const { data: existingPlace, error: checkError } = await supabase
       .from('places')
       .select('id')
@@ -41,7 +39,6 @@ export class OnboardingService {
     if (existingPlace) {
       placeId = existingPlace.id;
     } else {
-      // Create new place
       const { data: newPlace, error: createError } = await supabase
         .from('places')
         .insert({
@@ -59,14 +56,12 @@ export class OnboardingService {
       placeId = newPlace.id;
     }
 
-    // Update user with home city information
     const { data, error } = await supabase
-      .from('users')
-      .update({
-        home_city: city,
-        home_country: country,
+      .from('user_home')
+      .insert({
+        user_id: userId,
+        home_id: placeId,
       })
-      .eq('id', userId)
       .select()
       .single();
 

@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
@@ -19,25 +20,45 @@ export class AuthController {
 
   @Post('signUp')
   async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+    try {
+      return await this.authService.signUp(signUpDto);
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw new BadRequestException('Error signing up');
+    }
   }
 
   @Post('signIn')
   async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+    try {
+      return await this.authService.signIn(signInDto);
+    } catch (error) {
+      console.error('Error signing in:', error);
+      throw new BadRequestException('Error signing in');
+    }
   }
 
   @Post('signOut')
   @UseGuards(SupabaseAuthGuard)
   @UseInterceptors(SetAuthTokenInterceptor)
   async signOut() {
-    return this.authService.signOut();
+    try {
+      return await this.authService.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw new BadRequestException('Error signing out');
+    }
   }
 
   @Get('getUser')
   @UseGuards(SupabaseAuthGuard)
   @UseInterceptors(SetAuthTokenInterceptor)
   async getUser(@CurrentUser('id') userId: string) {
-    return this.authService.getUser(userId);
+    try {
+      return await this.authService.getUser(userId);
+    } catch (error) {
+      console.error('Error getting user:', error);
+      throw new BadRequestException('Error getting user');
+    }
   }
 }

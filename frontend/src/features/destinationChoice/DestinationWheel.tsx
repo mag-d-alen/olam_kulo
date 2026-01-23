@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { useGetDestination } from '../features/destinationChoice/hooks/useGetDestination';
-import { useSetDestination } from '../features/destinationChoice/hooks/useSetDestination';
-import { useUser } from '../authentication/hooks/useAuth';
-import { SpinningWheel } from '../components/SpinningWheel';
+import { useUser } from '../../authentication/hooks/useAuth';
+import { SpinningWheel } from '../../components/SpinningWheel';
+import { useGetDestination } from './hooks/useGetDestination';
+import { useSetDestination } from './hooks/useSetDestination';
+
 
 export const DestinationWheel = () => {
   const {places} = useGetDestination();

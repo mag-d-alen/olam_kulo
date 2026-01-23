@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 @Injectable()
 export class PlacesService {
@@ -6,17 +6,23 @@ export class PlacesService {
 
   async getAllPlaces(userId: string) {
     const supabase = this.authService.getAuthClient();
-    const userDestination = await this.getUserDestinations(userId);
+    const userDestinations = await this.getUserDestinations(userId);
+    
+    const userHome = await this.getHomeCityData(userId);
     const { data, error } = await supabase
       .from('places')
       .select('*')
       .not(
-        'city',
+        'id',
         'in',
-        userDestination.cities?.length
-          ? `(${userDestination.cities.join(',')})`
+        userDestinations.ids?.length
+          ? `(${userDestinations.ids.join(',')})`
           : '(null)',
-      );
+      )
+      .neq(
+        'id',
+        userHome?.id ?? -1,
+      )
     if (error) throw error;
     return data;
   }
@@ -58,6 +64,29 @@ export class PlacesService {
     return { message: 'Destination set successfully' };
   }
 
+  async getCityByLatLng({ lat, lng }: { lat: number, lng: number }) {
+    try { 
+      console.log(lat, lng)
+    } catch (error) {
+      console.error('Error getting city by lat and lng:', error);
+      throw new BadRequestException('Error getting city by lat and lng');
+    }
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      ,{
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        }
+      }
+    );
+    const data = await res.json();
+    return {
+      city: data.address.city,
+      country: data.address.country,
+    };
+  }
+
   private async getUserDestinations(userId: string) {
     const supabase = this.authService.getAuthClient();
     const { data, error } = await supabase
@@ -75,9 +104,17 @@ export class PlacesService {
     };
   }
 
-  async getHomeCityData(city: string) {
-    const data = await this.getPlaceData(city);
-    return data;
+  async getHomeCityData(userId: string) {
+    const supabase = this.authService.getAuthClient();
+    const { data, error } = await supabase
+      .from('user_home')
+      .select('home_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    const homeCity = await this.getPlaceData(data.home_id);
+    return homeCity;
   }
 
   async getDestinationCityData(city: string) {
