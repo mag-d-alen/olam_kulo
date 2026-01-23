@@ -99,46 +99,27 @@ export const HomeCityMapInput = () => {
       mapEvents.setView(e.latlng, mapEvents.getZoom())
     }
   });
-  
-  // if (!homeCityLatLng) {
-  //   map.locate({ setView: true, enableHighAccuracy: true })
-  //   map.on('locationfound', (e: LocationEvent) => {
-  //     setHomeCityLatLng(e.latlng)
-
-  //     console.log('locationfound', e)
-  //     mapEvents.setView(e.latlng, mapEvents.getZoom())
-  //     getHomeCityName({ lat: e.latlng.lat, lng: e.latlng.lng })
-  //   })
-  //   map.on('click', (e: LeafletMouseEvent) => {
-  //     setHomeCityLatLng(e.latlng)
-  //   })
-
-  // }
-
-
 
 
   return (
     <>
       {isPending && <div>Loading...</div>}
-      <div className="flex gap-2 items-center z-50 absolute top-500 left-0 p-4 rounded-md shadow-md z-550 bg-white">
 
-        {homeCityLatLng && (
-          <Marker position={homeCityLatLng}>
-            <Popup position={homeCityLatLng} keepInView
+      {homeCityLatLng && (
+        <Marker position={homeCityLatLng}>
+          <Popup position={homeCityLatLng} keepInView
             autoClose={false}
             closeOnClick={false}
             closeOnEscapeKey={true}
             closeButton={true}
-            >
-              {homeCity && <>
-                <p>Should we add {homeCity.city}, {homeCity.country} as your home city?</p>
-                <Button onClick={() => addHomeCity({ lat: homeCityLatLng.lat, lng: homeCityLatLng.lng, city: homeCity.city, country: homeCity.country })}>Yes</Button>
-              </>}
-            </Popup>
-          </Marker>
-        )}
-      </div>
+          >
+            {homeCity && <>
+              <p>Should we add {homeCity.city}, {homeCity.country} as your home city?</p>
+              <Button onClick={() => addHomeCity({ lat: homeCityLatLng.lat, lng: homeCityLatLng.lng, city: homeCity.city, country: homeCity.country })}>Yes</Button>
+            </>}
+          </Popup>
+        </Marker>
+      )}
     </>
   );
 }
