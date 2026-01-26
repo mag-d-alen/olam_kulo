@@ -20,7 +20,6 @@ export class PlacesController {
   @UseGuards(SupabaseAuthGuard)
   async getAllPlaces(@CurrentUser('id') userId: string) {
     try {
-      console.log('getAllPlaces', await this.placesService.getAllPlaces(userId))
       return await this.placesService.getAllPlaces(userId);
     } catch (error) {
       console.error('Error getting all places:', error);

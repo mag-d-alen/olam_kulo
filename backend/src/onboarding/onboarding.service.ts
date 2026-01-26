@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { PlacesService } from '../places/places.service';
+import { PostgrestError } from '@supabase/supabase-js';
 
 @Injectable()
 export class OnboardingService {
@@ -22,50 +23,51 @@ export class OnboardingService {
     userId: string;
   }) {
     const supabase = this.authService.getAuthClient();
+    let placeId = (await this.findIdOfExistingPlace(city, country))?.id;
+    if (!placeId) {
+      console.log('Creating new place');
+      placeId = (await this.createNewPlace(city, country, lat, lng)).id;
+    }
+    console.log('User ID', userId);
+    console.log('Place ID', placeId);
+    const { data, error } = await supabase
+      .from('user_home')
+      .insert({
+        home_id: placeId,
+        user_id: userId,
+      })
+      .select()
+      .single();
+    if (error) throw new PostgrestError({
+      message: 'Error adding home city' + error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
 
-    let placeId: string | null = null;
+    return { message: 'Home city added successfully', data };
+  }
 
-    const { data: existingPlace, error: checkError } = await supabase
+  private async findIdOfExistingPlace(city: string, country: string) {
+    const supabase = this.authService.getAuthClient();
+    const { data, error } = await supabase
       .from('places')
       .select('id')
       .eq('city', city)
       .eq('country', country)
       .maybeSingle();
+    if (error) throw new BadRequestException('Error finding existing place' + error );
+    return data;
+  }
 
-    if (checkError) {
-      throw checkError;
-    }
-
-    if (existingPlace) {
-      placeId = existingPlace.id;
-    } else {
-      const { data: newPlace, error: createError } = await supabase
-        .from('places')
-        .insert({
-          city,
-          country,
-          lat,
-          lng,
-        })
-        .select('id')
-        .single();
-
-      if (createError) {
-        throw createError;
-      }
-      placeId = newPlace.id;
-    }
-
+  private async createNewPlace(city: string, country: string, lat: number, lng: number) {
+    const supabase = this.authService.getAuthClient();
     const { data, error } = await supabase
-      .from('user_home')
-      .insert({
-        user_id: userId,
-        home_id: placeId,
-      })
-      .select()
+      .from('places')
+      .insert({ city, country, lat, lng })
+      .select('id')
       .single();
-
-    if (error) throw error;
-    return { message: 'Home city added successfully', data };
+    if (error) throw new BadRequestException('Error creating new place' + error.message);
+    return data;
   }
 }

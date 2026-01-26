@@ -27,7 +27,7 @@ export const Map = ({
 
   
   return (
-    <div className=" h-screen w-screen overflow-hidden">
+    <div className="h-screen w-screen overflow-hidden">
      {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
       <MapContainer
         className="h-screen w-screen rounded-lg overflow-hidden border border-gray-300"

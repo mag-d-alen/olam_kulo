@@ -2,27 +2,25 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 @Injectable()
 export class PlacesService {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   async getAllPlaces(userId: string) {
     const supabase = this.authService.getAuthClient();
     const userDestinations = await this.getUserDestinations(userId);
-    
     const userHome = await this.getHomeCityData(userId);
-    const { data, error } = await supabase
-      .from('places')
-      .select('*')
-      .not(
-        'id',
-        'in',
-        userDestinations.ids?.length
-          ? `(${userDestinations.ids.join(',')})`
-          : '(null)',
-      )
-      .neq(
-        'id',
-        userHome?.id ?? -1,
-      )
+    let query = supabase.from('places').select('*');
+    if (userDestinations.ids?.length > 1) {
+
+      query = query.not('id', 'in', userDestinations.ids);
+    }
+    else if (userDestinations.ids?.length === 1) {
+      query = query.neq('id', userDestinations.ids);
+    }
+    if (userHome?.id) {
+      query = query.neq('id', userHome.id);
+    }
+    const { data, error } = await query;
+    if (error) console.error('Error getting all places:', error);
     if (error) throw error;
     return data;
   }
@@ -65,15 +63,14 @@ export class PlacesService {
   }
 
   async getCityByLatLng({ lat, lng }: { lat: number, lng: number }) {
-    try { 
-      console.log(lat, lng)
+    try {
     } catch (error) {
       console.error('Error getting city by lat and lng:', error);
       throw new BadRequestException('Error getting city by lat and lng');
     }
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-      ,{
+      , {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
