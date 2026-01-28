@@ -6,21 +6,20 @@ export class PlacesService {
 
   async getAllPlaces(userId: string) {
     const supabase = this.authService.getAuthClient();
-    const userDestinations = await this.getUserDestinations(userId);
+    const userDestinations: string[] = await this.getUserDestinations(userId);
     const userHome = await this.getHomeCityData(userId);
     let query = supabase.from('places').select('*');
-    if (userDestinations.ids?.length > 1) {
-
-      query = query.not('id', 'in', userDestinations.ids);
+    if (userDestinations.length > 1) {
+      query = query.not('id', 'in', `(${userDestinations})`);
     }
-    else if (userDestinations.ids?.length === 1) {
-      query = query.neq('id', userDestinations.ids);
+    if (userDestinations.length === 1) {
+      query = query.neq('id', userDestinations[0]);
     }
     if (userHome?.id) {
       query = query.neq('id', userHome.id);
     }
     const { data, error } = await query;
-    if (error) console.error('Error getting all places:', error);
+    if (error) console.error('Error getting all places:', error.message);
     if (error) throw error;
     return data;
   }
@@ -91,14 +90,11 @@ export class PlacesService {
       .select('*, places(*)')
       .eq('user_id', userId);
     if (error) throw error;
+    if (!data) return [];
     const destinations = data.map((place) => ({
       ...place.places,
     }));
-    return {
-      cities: destinations.map((destination) => destination.city),
-      countries: destinations.map((destination) => destination.country),
-      ids: destinations.map((destination) => destination.id),
-    };
+    return destinations.map((destination) => destination.id)
   }
 
   async getHomeCityData(userId: string) {

@@ -14,17 +14,12 @@ import { SupabaseAuthGuard } from 'src/auth/guards/supabase-auth.guard';
 
 @Controller('places')
 export class PlacesController {
-  constructor(private readonly placesService: PlacesService) {}
+  constructor(private readonly placesService: PlacesService) { }
 
   @Get('all')
   @UseGuards(SupabaseAuthGuard)
   async getAllPlaces(@CurrentUser('id') userId: string) {
-    try {
-      return await this.placesService.getAllPlaces(userId);
-    } catch (error) {
-      console.error('Error getting all places:', error);
-      throw new BadRequestException('Error getting all places');
-    }
+    return await this.placesService.getAllPlaces(userId);
   }
 
   @Get('visited')
@@ -54,7 +49,7 @@ export class PlacesController {
   @UseGuards(SupabaseAuthGuard)
   async getCityByLatLng(@Body() body: { lat: number, lng: number }) {
     try {
-      return await this.placesService.getCityByLatLng({lat: body.lat, lng: body.lng});
+      return await this.placesService.getCityByLatLng({ lat: body.lat, lng: body.lng });
     } catch (error) {
       console.error('Error getting city by lat and lng:', error);
       throw new BadRequestException('Error getting city by lat and lng');
