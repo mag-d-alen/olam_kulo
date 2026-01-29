@@ -12,7 +12,6 @@ export function CountriesLayer() {
     zIndex: 2000,
   };
   const { data: countries, isLoading } = useGetCountriesData();
-  console.log('countries', countries);
   if (isLoading) return <Loader text="Loading countries data..." />;
   if (!countries) return <></>;
 
@@ -26,7 +25,6 @@ function onEachCountry(feature: any, layer: L.Layer) {
   layer.on({
     click: () => {
       console.log('Country clicked:', properties.COUNTRY);
-      alert(`Country: ${properties.COUNTRY}`);
     },
     mouseover: (e: any) => {
       e.target.setStyle({
