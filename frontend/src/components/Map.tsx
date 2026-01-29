@@ -17,6 +17,7 @@ type MapProps = {
   focusPlace: PlaceData | null;
   headerText?: string;
   zoom?: number;
+  loading?: boolean;
 };
 
 export const Map = ({
@@ -24,11 +25,9 @@ export const Map = ({
   focusPlace,
   headerText,
   zoom = 100,
+  loading = false,
 }: MapProps): React.ReactNode => {
-
-  const calculatedZoom = Math.abs(focusPlace?.lat ?? 0) + Math.abs(focusPlace?.lng ?? 0) > 50 ? zoom / 2 : zoom;
-  const screenAwareZoom = window.innerWidth < 768 ? calculatedZoom / 10 : calculatedZoom;
-
+  const screenAwareZoom = window.innerWidth < 768 ? zoom / 10 : zoom;
   return (
     <div className="h-screen w-[100%] overflow-hidden flex flex-col items-center justify-center">
       {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
@@ -36,7 +35,7 @@ export const Map = ({
         className="md:h-[calc(100vh-100px)]  xs:h-[80px] w-[100%]  rounded-lg overflow-hidden border border-border-default"
         center={[focusPlace?.lat ?? 0, focusPlace?.lng ?? 0] as [number, number]}
         zoom={screenAwareZoom}
-        scrollWheelZoom={true}>
+        scrollWheelZoom={!loading}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -45,8 +44,5 @@ export const Map = ({
         {children}
       </MapContainer>
     </div>
-
-
-
   );
 };

@@ -22,6 +22,17 @@ export class PlacesController {
     return await this.placesService.getAllPlaces(userId);
   }
 
+  @Get('getCountries')
+  async getCountries() {
+    try {
+      return await this.placesService.getCountries();
+    }
+    catch (error) {
+      console.error('Error getting all countries data' + error)
+      throw new Error('Error getting all countries data')
+    }
+  }
+
   @Get('visited')
   async getUserVisitedPlacesForUser(@Param('userId') userId: string) {
     return this.placesService.getUserVisitedPlacesForUser(userId);
@@ -41,7 +52,7 @@ export class PlacesController {
       });
     } catch (error) {
       console.error('Error setting destination:', error);
-      throw new BadRequestException('Error setting destination');
+      throw new Error('Error setting destination');
     }
   }
 
