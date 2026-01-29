@@ -1,6 +1,5 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
-import { cn } from '../../lib/utils';
-
+import { cn } from '../lib/utils';
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
@@ -16,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-text-primary mb-1.5 "
+            className="block text-sm font-medium text-text-primary p-2"
           >
             {label}
           </label>
@@ -26,6 +25,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={cn(
             'input',
+            'text-text-primary  bg-bg-surface border border-border-default rounded-md p-2 mb-1.5',
             error && 'border-error focus:ring-error',
             className
           )}

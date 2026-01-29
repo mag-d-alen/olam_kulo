@@ -2,8 +2,8 @@ import { Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useEffect, useState, useRef } from "react";
 import { useAddHomeCity } from "./useAddHomeCity";
 import { LatLng, LeafletMouseEvent, LocationEvent } from "leaflet";
-import { Button } from "../../../components/ui";
 import { useGetCityNameByLatLand } from "./useGetCityNameByLatLand";
+import { Button } from "../../../components/Button";
 
 
 
@@ -57,6 +57,7 @@ export const HomeCityMapInput = () => {
           }}
         >
           <Popup position={homeCityLatLng}
+            className="bg-bg-surface text-text-on-dark"
             keepInView
             autoClose={true}
             closeOnClick={true}

@@ -3,9 +3,10 @@ import {
   MapContainer,
   TileLayer,
 } from 'react-leaflet';
+import { CountriesLayer } from '../features/displayCountries/MapCountriesLayer';
 
 type PlaceData = {
-  city: string;
+  city?: string;
   country?: string | null;
   lat: number;
   lng: number;
@@ -25,19 +26,23 @@ export const Map = ({
   zoom = 100,
 }: MapProps): React.ReactNode => {
 
-  
+  const calculatedZoom = Math.abs(focusPlace?.lat ?? 0) + Math.abs(focusPlace?.lng ?? 0) > 50 ? zoom / 2 : zoom;
+  const screenAwareZoom = window.innerWidth < 768 ? calculatedZoom / 10 : calculatedZoom;
+
   return (
-    <div className="h-screen w-screen overflow-hidden">
-     {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
+    <div className="h-screen w-[100%] overflow-hidden flex flex-col items-center justify-center">
+      {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
       <MapContainer
-        className="h-screen w-screen rounded-lg overflow-hidden border border-gray-300"
+        className="md:h-[calc(100vh-100px)]  xs:h-[80px] w-[100%]  rounded-lg overflow-hidden border border-border-default"
         center={[focusPlace?.lat ?? 0, focusPlace?.lng ?? 0] as [number, number]}
-        zoom={zoom}
+        zoom={screenAwareZoom}
         scrollWheelZoom={true}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />{children}
+        />
+        <CountriesLayer />
+        {children}
       </MapContainer>
     </div>
 

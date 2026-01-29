@@ -1,27 +1,30 @@
-import { Marker, Popup } from 'react-leaflet';
-import { useUser } from '../../authentication/hooks/useAuth';
+import { Marker } from 'react-leaflet';
 import { Map } from '../../components/Map';
+import { Place } from '../../types';
+import { LeafletPopup } from '../../components/LeafletPopup';
 
-export const JourneyMap = () => {
-  const { user } = useUser();
-  const destination = user?.destination ? {city: user?.destination.city, country: user?.destination.country, lat: user?.destination.lat, lng: user?.destination.lng} : null;
-  const homeCity = user?.homeCity ? {city: user?.homeCity.city, country: user?.homeCity.country, lat: user?.homeCity.lat, lng: user?.homeCity.lng} : null;
-  return  (<Map focusPlace={destination} zoom={3}>
-        {homeCity && (
-          <Marker position={[homeCity.lat, homeCity.lng]}>
-            <Popup>
-              <div>Home: {homeCity.city}, {homeCity.country}</div>
-            </Popup>
-          </Marker>
-        )}
-        {destination && (
-          <Marker position={[destination.lat, destination.lng]}>
-            <Popup>
-              <div>Destination: {destination.city}, {destination.country}</div>
-            </Popup>
-          </Marker>
-        )}
-      </Map>
+type MapFocus = {
+  destination: Place;
+  homeCity: Place;
+};
+export const JourneyMap = ({ destination, homeCity }: MapFocus) => {
+  const mapFocus = { lat: (homeCity.lat + destination.lat) / 2, lng: (homeCity.lng + destination.lng) / 2 } as Place;
+  return (<Map focusPlace={mapFocus} zoom={3}>
+    {homeCity && (
+      <Marker position={[homeCity.lat, homeCity.lng]} >
+        <LeafletPopup>
+          <div>Home: {homeCity.city}, {homeCity.country}</div>
+        </LeafletPopup>
+      </Marker>
+    )}
+    {destination && (
+      <Marker position={[destination.lat, destination.lng]}>
+        <LeafletPopup>
+          <div>Destination: {destination.city}, {destination.country}</div>
+        </LeafletPopup>
+      </Marker>
+    )}
+  </Map>
 
   );
 };

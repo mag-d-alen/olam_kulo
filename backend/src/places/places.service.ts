@@ -18,9 +18,8 @@ export class PlacesService {
     if (userHome?.id) {
       query = query.neq('id', userHome.id);
     }
-    const { data, error } = await query;
-    if (error) console.error('Error getting all places:', error.message);
-    if (error) throw error;
+    const { data
+    } = await query;
     return data;
   }
 

@@ -1,12 +1,10 @@
 import {  useMemo, useState } from 'react';
 
 const COLORS = [
-  '#3b82f6', // blue-500
-  '#60a5fa', // blue-400
-  '#8b5cf6', // violet-500
-  '#a78bfa', // violet-400
-  '#ec4899', // pink-500
-  '#f472b6', // pink-400
+  'var(--color-green)',
+  'var(--color-tan)',
+  'var(--color-orange)',
+
 ];
 const WHEEL_RADIUS = 320 / 2;
 export type WheelSegment = {

@@ -31,7 +31,7 @@ export const DashboardPage = () => {
         <NoDestinationInfo homeCity={homeCity.city} />
       )}
       <DestinationWheel />
-      <JourneyMap />
+      <JourneyMap destination={destination} homeCity={homeCity} />
     </>
   );
 };

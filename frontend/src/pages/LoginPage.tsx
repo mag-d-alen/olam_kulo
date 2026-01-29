@@ -1,6 +1,7 @@
 import { useSignIn } from '../authentication/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { Input } from '../components/Input';
 export const LoginPage = () => {
   const {
     register,
@@ -14,18 +15,20 @@ export const LoginPage = () => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit((data) => signIn(data))}>
         <div>
-          <input
+          <Input
             {...register('email')}
             type="email"
             placeholder="Email"
+            label="Email"
             required
           />
         </div>
         <div>
-          <input
+          <Input
+            {...register('password')}
             type="password"
             placeholder="Password"
-            {...register('password')}
+            label='Password'
           />
         </div>
         {signInError && <div>{signInError.message}</div>}
