@@ -29,10 +29,10 @@ export const Map = ({
 }: MapProps): React.ReactNode => {
   const screenAwareZoom = window.innerWidth < 768 ? zoom / 10 : zoom;
   return (
-    <div className="h-screen w-[100%] overflow-hidden flex flex-col items-center justify-center">
+    <div className="h-screen w-full overflow-hidden flex flex-col items-center justify-center">
       {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
       <MapContainer
-        className="md:h-[calc(100vh-100px)]  xs:h-[80px] w-[100%]  rounded-lg overflow-hidden border border-border-default"
+        className="h-5/6   w-full  rounded-lg overflow-hidden border border-border-default"
         center={[focusPlace?.lat ?? 0, focusPlace?.lng ?? 0] as [number, number]}
         zoom={screenAwareZoom}
         scrollWheelZoom={!loading}>
