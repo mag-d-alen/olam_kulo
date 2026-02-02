@@ -23,7 +23,6 @@ export function MapCountriesLayer() {
 
   const onEachCountry = ({ feature, layer }: OnEachCountryProps) => {
     const { properties } = feature;
-    const isInItinerary = userItinerary.includes(properties.COUNTRY);
     layer.on({
       click: (e: any) => {
         setClickedCountry({
@@ -34,11 +33,6 @@ export function MapCountriesLayer() {
         });
         e.target.setStyle(selectedStyle);
 
-      },
-      mouseover: (e: any) => {
-        e.target.setStyle(
-          isInItinerary ? selectedStyle : hoveredStyle
-        );
       },
     })
   }
