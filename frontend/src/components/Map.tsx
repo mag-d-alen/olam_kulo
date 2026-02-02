@@ -3,7 +3,7 @@ import {
   MapContainer,
   TileLayer,
 } from 'react-leaflet';
-import { CountriesLayer } from '../features/displayCountries/MapCountriesLayer';
+import { MapCountriesLayer } from '../features/displayCountries/MapCountriesLayer';
 
 type PlaceData = {
   city?: string;
@@ -40,7 +40,7 @@ export const Map = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <CountriesLayer />
+        <MapCountriesLayer />
         {children}
       </MapContainer>
     </div>

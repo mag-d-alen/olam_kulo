@@ -38,7 +38,8 @@ export const Button = ({
         variantClasses[variant],
         sizeClasses[size],
         isLoading && 'opacity-75 cursor-wait',
-        className
+        className,
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
       disabled={disabled || isLoading}
       {...props}

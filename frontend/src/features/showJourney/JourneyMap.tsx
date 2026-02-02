@@ -2,7 +2,6 @@ import { Marker } from 'react-leaflet';
 import { Map } from '../../components/Map';
 import { Place } from '../../types';
 import { LeafletPopup } from '../../components/LeafletPopup';
-import { CountriesLayer } from '../displayCountries/MapCountriesLayer';
 
 type MapFocus = {
   destination: Place;
