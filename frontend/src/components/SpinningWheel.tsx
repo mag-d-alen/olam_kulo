@@ -1,4 +1,4 @@
-import {  useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const COLORS = [
   'var(--color-green)',
@@ -19,7 +19,7 @@ type SpinningWheelProps = {
   isSpinning: boolean;
   setIsSpinning: (isSpinning: boolean) => void;
   wheelData: WheelSegment[];
-  onSpin: (value: { city: string; country: string , id: string }) => void;
+  onSpin: (value: { city: string; country: string, id: string }) => void;
 };
 
 export const SpinningWheel = ({
@@ -30,7 +30,6 @@ export const SpinningWheel = ({
   onSpin,
 }: SpinningWheelProps) => {
   const [rotation, setRotation] = useState(0);
-
   const segments = useMemo(() => createWheelSegments(wheelData), [wheelData]);
 
   const spinWheel = () => {
@@ -106,7 +105,6 @@ export const SpinningWheel = ({
                       WHEEL_RADIUS
                     )}
                     fill={color}
-                    // strokeWidth="4"
                   />
                   <defs>
                     <path
@@ -139,9 +137,8 @@ export const SpinningWheel = ({
         <button
           onClick={spinWheel}
           disabled={isSpinning}
-          className={`px-8 py-4 rounded-full font-bold text-lg transition-all ${
-            isSpinning && 'bg-gray-400 cursor-not-allowed'
-          }`}
+          className={`px-8 py-4 rounded-full font-bold text-lg transition-all ${isSpinning && 'bg-gray-400 cursor-not-allowed'
+            }`}
         >
           {isSpinning ? 'Spinning...' : 'Spin the Wheel!'}
         </button>

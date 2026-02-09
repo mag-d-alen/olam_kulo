@@ -30,7 +30,7 @@ export const DashboardPage = () => {
       ) : (
         <NoDestinationInfo homeCity={homeCity.city} />
       )}
-      <DestinationWheel />
+      {!user?.destination?.city ? <DestinationWheel /> : null}
       <JourneyMap destination={destination} homeCity={homeCity} />
     </>
   );

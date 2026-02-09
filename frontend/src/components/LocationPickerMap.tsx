@@ -31,7 +31,6 @@ type LocationPickerMapProps = {
   initialZoom?: number;
 };
 
-// Component to handle map clicks
 function MapClickHandler({
   onLocationSelect,
 }: {
@@ -45,12 +44,11 @@ function MapClickHandler({
       const { lat, lng } = e.latlng;
 
       try {
-        // Reverse geocoding using OpenStreetMap Nominatim API
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
           {
             headers: {
-              'User-Agent': 'OlamKulo/1.0', // Required by Nominatim
+              'User-Agent': 'OlamKulo/1.0',
             },
           }
         );
@@ -62,7 +60,6 @@ function MapClickHandler({
         const data = await response.json();
         const address = data.address || {};
 
-        // Extract city and country from address
         const city =
           address.city ||
           address.town ||

@@ -1,6 +1,4 @@
 import { Popup, useMap } from 'react-leaflet';
-import { useGetCountriesData } from './hooks/useGetCountriesData';
-import { Loader } from '../../components/Loader';
 import { Button } from '../../components/Button';
 import { Place } from '../../types';
 import { useRef, useState } from 'react';
@@ -13,35 +11,14 @@ import { CountriesLayer } from './CountriesLayer';
 
 export function MapCountriesLayer() {
   const [userItinerary, setUserItinerary] = useState<Array<string>>([]);
-  const { data: countries, isLoading } = useGetCountriesData();
   const map = useMap();
   const clickedCountryRef = useRef<Place | null>(null);
-
-  if (isLoading) return <Loader text="Loading countries data..." />;
-  if (!countries) return <></>;
-
-
-  const onEachCountry = ({ feature, layer }: OnEachCountryProps) => {
-    const { properties } = feature;
-    layer.on({
-      click: (e: any) => {
-        setClickedCountry({
-          city: "",
-          country: properties.COUNTRY,
-          lat: e.latlng.lat,
-          lng: e.latlng.lng,
-        });
-        e.target.setStyle(selectedStyle);
-
-      },
-    })
-  }
 
   const setClickedCountry = (country: Place) => {
     clickedCountryRef.current = country;
   }
 
-  const addCountryToItinerary = () => {
+  const updateItinerary = () => {
     if (!clickedCountryRef.current || !clickedCountryRef.current.country) return;
     const isInItinerary = userItinerary.includes(clickedCountryRef.current!.country);
     if (isInItinerary) {
@@ -54,6 +31,8 @@ export function MapCountriesLayer() {
 
   const saveItinerary = () => {
     console.log("userItinerary", userItinerary);
+    map.closePopup();
+
 
   }
 
@@ -64,26 +43,24 @@ export function MapCountriesLayer() {
       : defaultStyle;
   };
 
-  return (<>
-    <CountriesLayer customStyle={style as PathOptions} onEachCountry={onEachCountry}>
+  return (
+    <CountriesLayer customStyle={style as PathOptions} handleClickedCountry={(country: Place) => setClickedCountry(country)}>
       <Popup>
-        <div className="flex flex-col gap-2">Update your itinerary?
-          <Button onClick={addCountryToItinerary}>
-            Update
-          </Button>
+        <div className="flex flex-col gap-2"><h3>Would you like to add this country to your itinerary or save the chosen route?</h3>
+          <div className="flex flex-row gap-2 justify-center">
+            <Button onClick={updateItinerary} variant="secondary">
+              Update Itinerary
+            </Button>
+            <Button onClick={saveItinerary} variant="secondary">
+              Save Route
+            </Button>
+          </div>
         </div>
       </Popup>
     </CountriesLayer>
-    <div className="absolute top-0 right-0 z-[1004]">
-      <Button onClick={saveItinerary} disabled={userItinerary.length === 0} >Save Itinerary</Button>
-    </div>
-  </>
   );
 }
-type OnEachCountryProps = {
-  feature: any;
-  layer: L.Layer;
-}
+
 
 
 const defaultStyle = {
@@ -91,19 +68,6 @@ const defaultStyle = {
   color: 'inherit',
   fillOpacity: 0,
   weight: 0.1,
-};
-const hoveredStyle = {
-  fillColor: '#f0a529',
-  color: '#f0a529',
-  fillOpacity: 0.2,
-  weight: 0.5,
-};
-
-const selectedStyle = {
-  fillColor: '#f0a529',
-  color: '#f0a529',
-  fillOpacity: 0.6,
-  weight: 0.5,
 };
 const confirmedStyle = {
   fillColor: '#e18222',

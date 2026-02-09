@@ -3,7 +3,7 @@ import { GeoJsonObject } from 'geojson';
 
 export const getCountriesData = async () => {
     try {
-        return apiClient.get('places/getCountries').then((res) => {
+        return apiClient.get('places/countries').then((res) => {
             return res.data as GeoJsonObject;
         });
     } catch (error) {
