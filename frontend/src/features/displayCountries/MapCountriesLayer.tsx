@@ -10,21 +10,21 @@ import { CountriesLayer } from './CountriesLayer';
 
 
 export function MapCountriesLayer() {
-  const [userItinerary, setUserItinerary] = useState<Array<string>>([]);
+  const [userItinerary, setUserItinerary] = useState<Array<Place>>([]);
   const map = useMap();
-  const clickedCountryRef = useRef<Place | null>(null);
+  const clickedCountryRef = useRef<Place>();
 
-  const setClickedCountry = (country: Place) => {
-    clickedCountryRef.current = country;
+  const setClickedCountry = (countryData: Place) => {
+    clickedCountryRef.current = countryData;
   }
 
   const updateItinerary = () => {
-    if (!clickedCountryRef.current || !clickedCountryRef.current.country) return;
-    const isInItinerary = userItinerary.includes(clickedCountryRef.current!.country);
+    const isInItinerary = userItinerary.filter(country => country.country === clickedCountryRef.current?.country).length > 0;
+    console.log(`${clickedCountryRef.current?.country} is in itinerary: ${isInItinerary}`);
     if (isInItinerary) {
-      setUserItinerary(prev => prev.filter(country => country !== clickedCountryRef.current!.country));
+      setUserItinerary(prev => prev.filter(country => country.country !== clickedCountryRef.current?.country));
     } else {
-      setUserItinerary(prev => [...prev, clickedCountryRef.current!.country]);
+      setUserItinerary(prev => [...prev, clickedCountryRef.current as Place]);
     }
     map.closePopup();
   }
@@ -37,14 +37,14 @@ export function MapCountriesLayer() {
   }
 
   const style = (feature?: Feature) => {
-    const name = feature?.properties?.COUNTRY;
-    return userItinerary.includes(name)
+    const name = feature?.properties?.name;
+    return userItinerary.filter(country => country.country === name).length > 0
       ? confirmedStyle
       : defaultStyle;
   };
 
   return (
-    <CountriesLayer customStyle={style as PathOptions} handleClickedCountry={(country: Place) => setClickedCountry(country)}>
+    <CountriesLayer customStyle={style as PathOptions} handleClickedCountry={countryData => setClickedCountry(countryData)} >
       <Popup>
         <div className="flex flex-col gap-2"><h3>Would you like to add this country to your itinerary or save the chosen route?</h3>
           <div className="flex flex-row gap-2 justify-center">
@@ -57,7 +57,7 @@ export function MapCountriesLayer() {
           </div>
         </div>
       </Popup>
-    </CountriesLayer>
+    </ CountriesLayer>
   );
 }
 

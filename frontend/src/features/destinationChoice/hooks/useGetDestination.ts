@@ -6,7 +6,7 @@ export const useGetDestination = () => {
   const { session } = useAuthContext();
   const { data: places, isLoading } = useQuery({
     queryKey: ['places'],
-    queryFn: () => getDestinations(),
+    queryFn: getDestinations,
     enabled: !!session?.access_token,
   });
   return { places, isLoading };

@@ -5,7 +5,8 @@ export type User = {
   destination?: Place;
 };
 export type Place = {
-  city: string;
+  id: string;
+  city?: string;
   country: string;
   lat: number;
   lng: number;

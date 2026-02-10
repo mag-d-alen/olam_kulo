@@ -1,22 +1,52 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
-import { AxiosError } from 'axios';
-import { error } from 'console';
+import { Injectable } from '@nestjs/common';
 import { PostgrestError } from '@supabase/supabase-js';
+import { AxiosError } from 'axios';
+import { SupabaseService } from 'src/supabase/supabase.service';
 @Injectable()
 export class PlacesService {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly supabaseService: SupabaseService) { }
 
-  async getAllPlaces(userId: string) {
-    const supabase = this.authService.getAuthClient();
-    const userDestinations: string[] = await this.getUserDestinations(userId);
+
+  async getCountries() {
+    const supabase = this.supabaseService.getClient();
+    const { data, error } = await supabase
+      .from('countries')
+      .select('*');
+    if (error) {
+      throw new PostgrestError({ message: error.message, details: error.details, hint: error.hint, code: error.code });
+    }
+    return data;
+  }
+
+  async getVisitedPlaces(userId: string) {
+    const supabase = this.supabaseService.getClient();
+    const { data, error } = await supabase
+      .from('user_destinations')
+      .select('*, places(*)')
+      .eq('user_id', userId);
+    if (error) throw new PostgrestError({
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+    if (!data) return [];
+    const destinations = data.map((place) => ({
+      ...place.places,
+    }));
+    return destinations.map((destination) => destination.id)
+  }
+
+  async getUnvisitedPlaces(userId: string) {
+    const supabase = this.supabaseService.getClient();
+    const visitedPlaces: string[] = await this.getVisitedPlaces(userId);
     const userHome = await this.getHomeCityData(userId);
     let query = supabase.from('places').select('*');
-    if (userDestinations.length > 1) {
-      query = query.not('id', 'in', `(${userDestinations})`);
+    if (visitedPlaces.length > 1) {
+      query = query.not('id', 'in', `(${visitedPlaces})`);
     }
-    if (userDestinations.length === 1) {
-      query = query.neq('id', userDestinations[0]);
+    if (visitedPlaces.length === 1) {
+      query = query.neq('id', visitedPlaces[0]);
     }
     if (userHome?.id) {
       query = query.neq('id', userHome.id);
@@ -26,19 +56,18 @@ export class PlacesService {
     return data;
   }
 
-  async getUserVisitedPlacesForUser(userId: string) {
-    const supabase = this.authService.getAuthClient();
-    const { data, error } = await supabase
-      .from('user_destinations')
-      .select('city, country, destination_id')
-      .eq('user_id', userId);
-    if (error) throw error;
-    return data.map((place) => ({
-      city: place.city,
-      country: place.country,
-      id: place.destination_id,
-    }));
-  }
+  // async getVisitedPlaces(userId: string) {
+  //   const { data, error } = await this.supabase
+  //     .from('user_destinations')
+  //     .select('city, country, destination_id')
+  //     .eq('user_id', userId);
+  //   if (error) throw error;
+  //   return data.map((place) => ({
+  //     city: place.city,
+  //     country: place.country,
+  //     id: place.destination_id,
+  //   }));
+  // }
 
   async setDestination({
     destination,
@@ -47,7 +76,7 @@ export class PlacesService {
     destination: { city: string; country: string; id: string };
     userId: string;
   }) {
-    const supabase = this.authService.getAuthClient();
+    const supabase = this.supabaseService.getClient();
     const { error: userError } = await supabase
       .from('user_destinations')
       .insert({
@@ -80,7 +109,6 @@ export class PlacesService {
         }
       );
       const data = await res.json();
-      console.log(data)
       return {
         city: data.address.city,
         country: data.address.country,
@@ -91,27 +119,10 @@ export class PlacesService {
     }
   }
 
-  private async getUserDestinations(userId: string) {
-    const supabase = this.authService.getAuthClient();
-    const { data, error } = await supabase
-      .from('user_destinations')
-      .select('*, places(*)')
-      .eq('user_id', userId);
-    if (error) throw new PostgrestError({
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
-    if (!data) return [];
-    const destinations = data.map((place) => ({
-      ...place.places,
-    }));
-    return destinations.map((destination) => destination.id)
-  }
 
-  async getHomeCityData(userId: string) {
-    const supabase = this.authService.getAuthClient();
+
+  private async getHomeCityData(userId: string) {
+    const supabase = this.supabaseService.getClient();
     const { data, error } = await supabase
       .from('user_home')
       .select('home_id')
@@ -128,30 +139,15 @@ export class PlacesService {
     return homeCity;
   }
 
-  async getDestinationCityData(city: string) {
-    const data = await this.getPlaceData(city);
-    return data;
-  }
+  // async getDestinationCityData(city: string) {
+  //   const data = await this.getPlaceData(city);
+  //   return data;
+  // }
 
-  async getCountries() {
-    try {
-      const res = await fetch(
-        `https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson`
-        , {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          }
-        }
-      );
-      const data = await res.json();
-      return data;
-    } catch {
-      throw new AxiosError('Error getting countries data')
-    }
-  }
+
+
   private async getPlaceData(cityId: string) {
-    const supabase = this.authService.getAuthClient();
+    const supabase = this.supabaseService.getClient();
     const { data, error } = await supabase
       .from('places')
       .select('*')

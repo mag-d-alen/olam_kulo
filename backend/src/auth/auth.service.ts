@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { PlaceDto, SignInDto, SignUpDto, UserDto } from './dto/auth.dto';
+import { SignInDto, SignUpDto, UserDto } from './dto/auth.dto';
 import {
   Session,
   User,

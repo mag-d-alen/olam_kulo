@@ -1,11 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   Param,
   Post,
-  Query,
+  Query, 
   UseGuards,
 } from '@nestjs/common';
 import { PlacesService } from './places.service';
@@ -16,26 +15,26 @@ import { SupabaseAuthGuard } from 'src/auth/guards/supabase-auth.guard';
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) { }
 
-  @Get('all')
+  @Get('unvisited')
   @UseGuards(SupabaseAuthGuard)
-  async getAllPlaces(@CurrentUser('id') userId: string) {
-    return await this.placesService.getAllPlaces(userId);
+  async getUnvisitedDestinations(@CurrentUser('id') userId: string) {
+    return await this.placesService.getUnvisitedPlaces(userId);
   }
 
-  @Get('getCountries')
+  @Get('countries')
+  @UseGuards(SupabaseAuthGuard)
   async getCountries() {
     try {
       return await this.placesService.getCountries();
     }
     catch (error) {
-      console.error('Error getting all countries data' + error)
-      throw new Error('Error getting all countries data')
+      throw new Error('Error getting all countries data'+error)
     }
   }
 
   @Get('visited')
-  async getUserVisitedPlacesForUser(@Param('userId') userId: string) {
-    return this.placesService.getUserVisitedPlacesForUser(userId);
+  async getVisitedPlaces(@Param('userId') userId: string) {
+    return this.placesService.getVisitedPlaces(userId);
   }
 
   @Post('setDestination')
@@ -63,7 +62,7 @@ export class PlacesController {
       return await this.placesService.getCityByLatLng({ lat: body.lat, lng: body.lng });
     } catch (error) {
       console.error('Error getting city by lat and lng:', error);
-      throw new BadRequestException('Error getting city by lat and lng');
+      throw new Error('Error getting city by lat and lng');
     }
   }
 }

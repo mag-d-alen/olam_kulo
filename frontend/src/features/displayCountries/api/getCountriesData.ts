@@ -1,13 +1,26 @@
 import { apiClient } from "../../../services/api";
-import { GeoJsonObject } from 'geojson';
+import { FeatureCollection } from 'geojson';
 
 export const getCountriesData = async () => {
     try {
-        return apiClient.get('places/countries').then((res) => {
-            return res.data as GeoJsonObject;
-        });
+        const res = await apiClient.get('places/countries');
+        const mappedFeatures = mapToGeoJson(res.data);
+        return mappedFeatures;
     } catch (error) {
         console.error('Error getting countries data:', error);
-        throw error;
+
     }
 };
+const mapToGeoJson = (data: any[]): FeatureCollection => {
+    return ({
+        type: "FeatureCollection",
+        features: data.map(feature => ({
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: {
+                ...feature,
+
+            }
+        }))
+    })
+}

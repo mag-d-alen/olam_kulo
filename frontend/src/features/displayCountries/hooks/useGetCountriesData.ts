@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCountriesData } from "../api/getCountriesData";
-import { GeoJsonObject } from "geojson";
+import { useAuthContext } from "../../../authentication/contexts/AuthContext";
 
 export const useGetCountriesData = () => {
-    const { data, isLoading, error } = useQuery<GeoJsonObject, Error>({
+    const {session} = useAuthContext();
+    const { data, isLoading, error } = useQuery({
         queryKey: ['countries'],
-        queryFn: getCountriesData,
+        queryFn: () => getCountriesData(),
         staleTime: Infinity,
+        enabled: !!session?.access_token,
 
     });
     return { data, isLoading, error };
-};
+};      
