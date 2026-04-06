@@ -3,6 +3,7 @@ import { setDestination } from '../api/setDestination';
 
 export const useSetDestination = () => {
   const queryClient = useQueryClient();
+  let success = false
   const { mutate, isPending, error } = useMutation({
     mutationFn: async (destination: { city: string; country: string, id: string }) => {
       return setDestination(destination);
@@ -10,11 +11,13 @@ export const useSetDestination = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['places'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      success = true
     },
   });
   return {
     mutate,
     isPending,
     error,
+    success
   };
 };

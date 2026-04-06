@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { addHomeCity } from '../api/addHomeCity';
+import { toast } from 'react-toastify';
+import { Place } from '../../../types';
 
 type HomeCityData = {
   city: string;
@@ -10,21 +11,22 @@ type HomeCityData = {
 };
 
 export const useAddHomeCity = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  let success = false
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: async (homeCityData: HomeCityData) => {
-      return addHomeCity(homeCityData);
+      toast.success('Home city added successfully');
+      return addHomeCity(homeCityData as Place);
     },
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['user'] });
-      navigate('/dashboard', { replace: true });
+      success = true
     },
     onError: (error) => {
       console.error('Error adding home city:', error);
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, success};
 };

@@ -4,7 +4,7 @@ import {
   Get,
   Param,
   Post,
-  Query, 
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PlacesService } from './places.service';
@@ -13,7 +13,7 @@ import { SupabaseAuthGuard } from 'src/auth/guards/supabase-auth.guard';
 
 @Controller('places')
 export class PlacesController {
-  constructor(private readonly placesService: PlacesService) { }
+  constructor(private readonly placesService: PlacesService) {}
 
   @Get('unvisited')
   @UseGuards(SupabaseAuthGuard)
@@ -26,9 +26,8 @@ export class PlacesController {
   async getCountries() {
     try {
       return await this.placesService.getCountries();
-    }
-    catch (error) {
-      throw new Error('Error getting all countries data'+error)
+    } catch (error) {
+      throw new Error('Error getting all countries data' + error);
     }
   }
 
@@ -57,9 +56,12 @@ export class PlacesController {
 
   @Post('getCityByLatLng')
   @UseGuards(SupabaseAuthGuard)
-  async getCityByLatLng(@Body() body: { lat: number, lng: number }) {
+  async getCityByLatLng(@Body() body: { lat: number; lng: number }) {
     try {
-      return await this.placesService.getCityByLatLng({ lat: body.lat, lng: body.lng });
+      return await this.placesService.getCityByLatLng({
+        lat: body.lat,
+        lng: body.lng,
+      });
     } catch (error) {
       console.error('Error getting city by lat and lng:', error);
       throw new Error('Error getting city by lat and lng');

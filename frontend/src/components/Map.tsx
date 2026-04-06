@@ -1,8 +1,4 @@
-
-import {
-  MapContainer,
-  TileLayer,
-} from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 
 type PlaceData = {
   city?: string;
@@ -29,12 +25,17 @@ export const Map = ({
   const screenAwareZoom = window.innerWidth < 768 ? zoom / 10 : zoom;
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col items-center justify-center">
-      {headerText && <h3 className="text-center p-4 font-bold">{headerText}</h3>}
+      {headerText && (
+        <h3 className="text-center p-4 font-bold">{headerText}</h3>
+      )}
       <MapContainer
-        className="h-5/6   w-full  rounded-lg overflow-hidden border border-border-default"
-        center={[focusPlace?.lat ?? 0, focusPlace?.lng ?? 0] as [number, number]}
+        className="h-5/6   w-full bg-bg-app rounded-lg overflow-hidden"
+        center={
+          [focusPlace?.lat ?? 0, focusPlace?.lng ?? 0] as [number, number]
+        }
         zoom={screenAwareZoom}
-        scrollWheelZoom={!loading}>
+        scrollWheelZoom={!loading}
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

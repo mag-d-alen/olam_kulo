@@ -1,15 +1,18 @@
 import { useState, useMemo } from 'react';
-import { useUser } from '../../authentication/hooks/useAuth';
 import { SpinningWheel } from '../../components/SpinningWheel';
 import { useGetDestination } from './hooks/useGetDestination';
 import { useSetDestination } from './hooks/useSetDestination';
+import { Toast } from '../../components/Toast';
 
-
-export const DestinationWheel = () => {
-  const {places} = useGetDestination();
-  const { mutate: setDestination } = useSetDestination();
-  const { user } = useUser();
+type DestinationWheelProps = {
+  setPlace: ({ city, country, id }: { city: string, country: string, id: string }) => void;
+  result: string
+}
+export const DestinationWheel = ({ setPlace, result }: DestinationWheelProps) => {
+  const { places } = useGetDestination();
   const [isSpinning, setIsSpinning] = useState(false);
+
+
 
   const wheelData = useMemo(() => {
     if (!places || places.length === 0) return [];
@@ -43,22 +46,22 @@ export const DestinationWheel = () => {
     <div className="flex flex-col items-center gap-6 p-8">
       {places && (
         <SpinningWheel
-          showSpinButton={!user?.destination?.city}
+          showSpinButton={true}
           wheelData={wheelData}
           onSpin={(value: {
             city: string;
             country: string;
             id: string;
-          }) => setDestination(value)}
+          }) => setPlace(value)}
           isSpinning={isSpinning}
           setIsSpinning={setIsSpinning}
         />
       )}
-      {user?.destination?.city && !isSpinning && (
+      {result &&
         <p className="flex font-bold text-center">
-          🎉 {user.destination.city} 🎉
+          🎉 {result} 🎉
         </p>
-      )}
+      }
     </div>
   );
 };

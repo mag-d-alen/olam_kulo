@@ -4,16 +4,18 @@ import { AxiosError } from 'axios';
 import { SupabaseService } from 'src/supabase/supabase.service';
 @Injectable()
 export class PlacesService {
-  constructor(private readonly supabaseService: SupabaseService) { }
-
+  constructor(private readonly supabaseService: SupabaseService) {}
 
   async getCountries() {
     const supabase = this.supabaseService.getClient();
-    const { data, error } = await supabase
-      .from('countries')
-      .select('*');
+    const { data, error } = await supabase.from('countries').select('*');
     if (error) {
-      throw new PostgrestError({ message: error.message, details: error.details, hint: error.hint, code: error.code });
+      throw new PostgrestError({
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
     }
     return data;
   }
@@ -24,17 +26,18 @@ export class PlacesService {
       .from('user_destinations')
       .select('*, places(*)')
       .eq('user_id', userId);
-    if (error) throw new PostgrestError({
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
+    if (error)
+      throw new PostgrestError({
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
     if (!data) return [];
     const destinations = data.map((place) => ({
       ...place.places,
     }));
-    return destinations.map((destination) => destination.id)
+    return destinations.map((destination) => destination.id);
   }
 
   async getUnvisitedPlaces(userId: string) {
@@ -51,8 +54,7 @@ export class PlacesService {
     if (userHome?.id) {
       query = query.neq('id', userHome.id);
     }
-    const { data
-    } = await query;
+    const { data } = await query;
     return data;
   }
 
@@ -87,39 +89,39 @@ export class PlacesService {
       })
       .eq('user_id', userId)
       .single();
-    if (userError) throw new PostgrestError({
-      message: userError.message,
-      details: userError.details,
-      hint: userError.hint,
-      code: userError.code,
-    });
+    if (userError)
+      throw new PostgrestError({
+        message: userError.message,
+        details: userError.details,
+        hint: userError.hint,
+        code: userError.code,
+      });
     return { message: 'Destination set successfully' };
   }
 
-  async getCityByLatLng({ lat, lng }: { lat: number, lng: number }) {
+  async getCityByLatLng({ lat, lng }: { lat: number; lng: number }) {
     try {
-
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-        , {
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
-          }
-        }
+            'User-Agent': 'MyApp/1.0',
+          },
+        },
       );
+
       const data = await res.json();
       return {
         city: data.address.city,
         country: data.address.country,
       };
     } catch (error) {
-      console.error('Error getting city by lat and lng' + error)
-      throw new AxiosError('Error getting city by lat and lng')
+      console.error('Error getting city by lat and lng' + error);
+      throw new AxiosError('Error getting city by lat and lng');
     }
   }
-
-
 
   private async getHomeCityData(userId: string) {
     const supabase = this.supabaseService.getClient();
@@ -128,12 +130,13 @@ export class PlacesService {
       .select('home_id')
       .eq('user_id', userId)
       .maybeSingle();
-    if (error) throw new PostgrestError({
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
+    if (error)
+      throw new PostgrestError({
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
     if (!data) return null;
     const homeCity = await this.getPlaceData(data.home_id);
     return homeCity;
@@ -143,8 +146,6 @@ export class PlacesService {
   //   const data = await this.getPlaceData(city);
   //   return data;
   // }
-
-
 
   private async getPlaceData(cityId: string) {
     const supabase = this.supabaseService.getClient();

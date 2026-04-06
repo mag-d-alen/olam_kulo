@@ -4,19 +4,28 @@ import { useAddHomeCity } from "./useAddHomeCity";
 import { LatLng, LeafletMouseEvent, LocationEvent } from "leaflet";
 import { useGetCityNameByLatLand } from "./useGetCityNameByLatLand";
 import { Button } from "../../../components/Button";
+import { toast, ToastContainer } from "react-toastify";
 
 
 
 export const HomeCityMapInput = () => {
   const [homeCityLatLng, setHomeCityLatLng] = useState<LatLng | null>(null);
   const { mutate: getHomeCityName, data: homeCity, isPending } = useGetCityNameByLatLand()
-  const { mutate: addHomeCity } = useAddHomeCity()
+  const { mutate: addHomeCity, success } = useAddHomeCity()
+
   const map = useMap();
   const markerRef = useRef<any>(null);
 
   useEffect(() => {
     map.locate({ setView: true, enableHighAccuracy: true })
   }, [])
+
+  useEffect(() => {
+    if (success) {
+      toast.success('Home city added successfully');
+      return () => setHomeCityLatLng(null)
+    }
+  }, [success])
 
   useEffect(() => {
     if (markerRef.current) {
@@ -44,6 +53,7 @@ export const HomeCityMapInput = () => {
   return (
     <>
       {isPending && <div>Loading...</div>}
+      <ToastContainer position="top-right" />
       {homeCityLatLng && (
         <Marker
           position={homeCityLatLng}

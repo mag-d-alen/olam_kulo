@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["Postgrest"]
+  "cSpell.words": ["Postgrest"],
+  "snyk.advanced.autoSelectOrganization": true
 }

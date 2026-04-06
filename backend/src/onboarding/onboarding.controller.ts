@@ -23,14 +23,28 @@ export class OnboardingController {
     @CurrentUser('id') userId: string,
   ) {
     try {
-      return this.onboardingService.addHomeCity(
-        {...body, userId: userId},
-      );
+      return this.onboardingService.addHomeCity({ ...body, userId: userId });
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(`Error adding home city, ${(error as Error).message}`);
+      throw new BadRequestException(
+        `Error adding home city, ${(error as Error).message}`,
+      );
+    }
+  }
+
+  @Post('setItinerary')
+  async setItinerary(@CurrentUser('id') userId: string) {
+    try {
+      return this.onboardingService.setItinerary(userId);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Error setting itinerary, ${(error as Error).message}`,
+      );
     }
   }
 }

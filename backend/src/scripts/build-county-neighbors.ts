@@ -1,4 +1,3 @@
-
 import 'dotenv/config';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
@@ -15,7 +14,6 @@ const SUPABASE_SERVICE_ROLE_KEY = configService.get<string>(
 const VERSION = '2026-01';
 const SEA_DISTANCE_KM = 10;
 
-
 type CountryFeature = {
   type: 'Feature';
   properties: {
@@ -26,21 +24,19 @@ type CountryFeature = {
 };
 
 async function run() {
-
-  const supabase = createClient(
-    SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY
-  );
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   let countries = [];
   const { data: savedCountries } = await supabase.from('countries').select('*');
-  countries = savedCountries?.length ? savedCountries : await getCountries() as CountryFeature[];
+  countries = savedCountries?.length
+    ? savedCountries
+    : ((await getCountries()) as CountryFeature[]);
   if (!savedCountries?.length) {
     const { error: countriesError } = await supabase.from('countries').upsert(
       countries.map((f: CountryFeature) => ({
         name: f.properties.name,
-        geometry: f.geometry
+        geometry: f.geometry,
       })),
-      { onConflict: 'id' }
+      { onConflict: 'id' },
     );
     if (countriesError) {
       throw new Error('Error saving countries: ' + countriesError.message);
@@ -67,10 +63,12 @@ async function run() {
       const a = features[i];
       const b = features[j];
 
-      if (!turf.booleanIntersects(
-        turf.bboxPolygon(turf.bbox(a)),
-        turf.bboxPolygon(turf.bbox(b))
-      )) {
+      if (
+        !turf.booleanIntersects(
+          turf.bboxPolygon(turf.bbox(a)),
+          turf.bboxPolygon(turf.bbox(b)),
+        )
+      ) {
         continue;
       }
 
@@ -82,7 +80,7 @@ async function run() {
             type: 'land',
             distance_km: null,
             method: 'booleanTouches',
-            version: VERSION
+            version: VERSION,
           },
           {
             country_id: b.properties.id,
@@ -90,16 +88,15 @@ async function run() {
             type: 'land',
             distance_km: null,
             method: 'booleanTouches',
-            version: VERSION
-          }
+            version: VERSION,
+          },
         );
         continue;
       }
-      const dist = turf.distance(
-        turf.centroid(a),
-        turf.centroid(b)
+      const dist = turf.distance(turf.centroid(a), turf.centroid(b));
+      console.log(
+        `Distance between ${a.properties.name} and ${b.properties.name}: ${dist}`,
       );
-      console.log(`Distance between ${a.properties.name} and ${b.properties.name}: ${dist}`);
 
       if (dist <= SEA_DISTANCE_KM) {
         neighbors.push(
@@ -109,7 +106,7 @@ async function run() {
             type: 'sea',
             distance_km: dist,
             method: 'centroid_distance',
-            version: VERSION
+            version: VERSION,
           },
           {
             country_id: b.properties.id,
@@ -117,8 +114,8 @@ async function run() {
             type: 'sea',
             distance_km: dist,
             method: 'centroid_distance',
-            version: VERSION
-          }
+            version: VERSION,
+          },
         );
       }
     }
@@ -126,14 +123,9 @@ async function run() {
 
   console.log(`Computed ${neighbors.length} neighbor links`);
 
-  await supabase
-    .from('country_neighbors')
-    .delete()
-    .eq('version', VERSION);
+  await supabase.from('country_neighbors').delete().eq('version', VERSION);
 
-  const { error } = await supabase
-    .from('country_neighbors')
-    .insert(neighbors);
+  const { error } = await supabase.from('country_neighbors').insert(neighbors);
 
   if (error) {
     throw error;
@@ -147,31 +139,35 @@ run()
     console.log('Done');
     process.exit(0);
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
     process.exit(1);
   });
 
 async function getCountries() {
-  console.log("Getting countries data");
+  console.log('Getting countries data');
   try {
     const res = await fetch(
-      `https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson`
-      , {
+      `https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson`,
+      {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-        }
-      }
+        },
+      },
     );
     const data = await res.json();
     const mappedFeatures = data.features.map((feature: any) => ({
-
-      properties: { name: feature.properties.COUNTRY, id: feature.properties.AFF_ISO, },
-      geometry: feature.geometry
+      properties: {
+        name: feature.properties.COUNTRY,
+        id: feature.properties.AFF_ISO,
+      },
+      geometry: feature.geometry,
     }));
     return mappedFeatures;
   } catch (error) {
-    console.error(new AxiosError('Error getting countries data', error as string));
+    console.error(
+      new AxiosError('Error getting countries data', error as string),
+    );
   }
 }

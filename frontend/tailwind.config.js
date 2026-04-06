@@ -4,6 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        'bg-app': 'var(--bg-app)',
         'bg-dark': 'var(--bg-dark)',
         'bg-primary': 'var(--bg-primary)',
         'bg-surface': 'var(--bg-surface)',

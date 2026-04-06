@@ -1,37 +1,37 @@
 import { useAuthContext } from '../authentication/contexts/AuthContext';
+import { Loader } from '../components/Loader';
+import { Toast } from '../components/Toast';
 import { DestinationWheel } from '../features/destinationChoice/DestinationWheel';
+import { useSetDestination } from '../features/destinationChoice/hooks/useSetDestination';
 import { JourneyMap } from '../features/showJourney/JourneyMap';
+import { Place } from '../types';
 
 export const DashboardPage = () => {
   const { user } = useAuthContext();
+  const { mutate: setDestination, success } = useSetDestination();
 
-  const destination = user!.destination ?? {
-    city: '',
-    country: '',
-    lat: 0,
-    lng: 0,
-  };
-  const homeCity = user!.homeCity ?? {
-    city: '',
-    country: '',
-    lat: 0,
-    lng: 0,
-  };
+  if (!user?.destination || !user?.homeCity) {
+    return <Loader />;
+  }
+  const hasDestination = user.destination.city.length > 0;
   return (
     <>
+      <Toast successMessage="Destination set successfully" />
       <div>
         <h1>Welcome to Olam Kulo</h1>
       </div>
-      {destination.city ? (
+      {hasDestination ? (
         <DestinationInfo
-          destinationCity={user!.destination!.city}
-          homeCity={homeCity.city}
+          destinationCity={user.destination.city}
+          homeCity={user.homeCity.city}
         />
       ) : (
-        <NoDestinationInfo homeCity={homeCity.city} />
+        <NoDestinationInfo homeCity={user.homeCity.city} />
       )}
-      {!user?.destination?.city ? <DestinationWheel /> : null}
-      <JourneyMap destination={destination} homeCity={homeCity} />
+      {!hasDestination ?
+        <DestinationWheel setPlace={setDestination} result={user.destination.city} /> :
+        <JourneyMap destination={user.destination as Place} homeCity={user.homeCity} />
+      }
     </>
   );
 };

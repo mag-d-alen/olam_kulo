@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 
-
 export function validateEmailFormat(email: string): boolean {
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -16,19 +15,19 @@ export function sanitizeAndValidatePassword(password: string): string {
     /<script/i,
     /<\/script>/i,
     /javascript:/i,
-    /on\w+\s*=/i, 
+    /on\w+\s*=/i,
     /<iframe/i,
     /<object/i,
     /<embed/i,
     /<link/i,
     /<meta/i,
     /<style/i,
-    /expression\s*\(/i, 
+    /expression\s*\(/i,
     /vbscript:/i,
     /data:text\/html/i,
-    /&#x/i, 
-    /%3C/i, 
-    /%3E/i, 
+    /&#x/i,
+    /%3C/i,
+    /%3E/i,
   ];
 
   for (const pattern of xssPatterns) {
@@ -39,7 +38,6 @@ export function sanitizeAndValidatePassword(password: string): string {
     }
   }
 
-
   const sanitized = password.replace(/[<>'"&]/g, '');
 
   if (sanitized.length < password.length) {
@@ -48,7 +46,7 @@ export function sanitizeAndValidatePassword(password: string): string {
     );
   }
 
-  return password; 
+  return password;
 }
 
 export function validateEmail(email: string): void {
